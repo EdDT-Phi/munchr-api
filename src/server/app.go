@@ -8,10 +8,12 @@ import "html/template"
 import "github.com/jmoiron/sqlx"
 import _ "github.com/lib/pq"
 import "log"
+import "encoding/json"
 
 var schema = `
+DROP TABLE users;
 CREATE TABLE users (
-	user_id		uuid,
+	user_id		serial,
 	fb_id		text,
     first_name 	text,
     last_name 	text,
@@ -19,13 +21,15 @@ CREATE TABLE users (
     email 		text
 );
 
+DROP TABLE place;
 CREATE TABLE place (
-	place_id	uuid,
+	place_id	serial,
     name 		text,
     lat 		float,
     long 		float
 );
 
+DROP TABLE likes;
 CREATE TABLE likes (
 	user_id		uuid,
 	place_id	uuid,
@@ -55,13 +59,15 @@ type Place struct {
 }
 
 type User struct {
-	Userid	string `db:"user_id"`
-	Uname	string `db:"user_name"`
+	Userid	string `db:"user_id"` 	
+	Uname	string `db:"user_name"`	
 	Fname	string `db:"first_name"`
-	Lname	string `db:"last_name"`
-	FBid	string `db:"fb_id"`
+	Lname	string `db:"last_name"`	
+	FBid	string `db:"fb_id"`		
 	Email	string
 }
+
+var db *sqlx.DB
 
 func getRestaurants(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -73,20 +79,28 @@ func loginPage(w http.ResponseWriter, r *http.Request) {
 	t.Execute(w, nil)
 }
 
+var newUserQuery = "INSERT INTO users (first_name, last_name, user_name, fb_id, email)"+
+					" VALUES ($1, $2, $3, $4, $5)"
 func saveUser(w http.ResponseWriter, r *http.Request) {
-	log.Println("hey")
-	fmt.Println("there")
-	fmt.Println(r.FormValue("first_name"), 
+	fmt.Println("New User: " +
+		r.FormValue("first_name"), 
 		r.FormValue("last_name"), 
 		r.FormValue("user_name"), 
 		r.FormValue("fb_id"), 
 		r.FormValue("email"))
-	http.Redirect(w, r, "/users/new", http.StatusFound)
+	tx := db.MustBegin()
+    tx.MustExec(newUserQuery, r.FormValue("first_name"), 
+		r.FormValue("last_name"), 
+		r.FormValue("user_name"), 
+		r.FormValue("fb_id"), 
+		r.FormValue("email"))
+    tx.Commit()
+	http.Redirect(w, r, "/users/viewAll/", http.StatusFound)
 }
 
 func newUser(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "<h1>New User</h1>" +
-		"<form acion=\"/users/save/\" method=\"POST\">" +
+		"<form action=\"/users/save/\" method=\"POST\">" +
 		"<label>first_name</label><br>" +
 		"<input type=\"text\" name=\"first_name\" ><br>" +
 		"<label>last_name</label><br>" +
@@ -101,8 +115,25 @@ func newUser(w http.ResponseWriter, r *http.Request) {
 		"</form>");
 }
 
+func viewAllUsers(w http.ResponseWriter, r *http.Request) {
+	users := []User{}
+	err := db.Select(&users, "SELECT * FROM users ORDER BY user_id")
+    if err != nil {
+        fmt.Println(err)
+        return
+    }
+    resp, err := json.Marshal(users)
+    if err != nil {
+        fmt.Println(err)
+        return
+    }
+    fmt.Println(resp)
+    fmt.Println(w, resp)
+}
+
 func main() {
-    db, err := sqlx.Connect("postgres", "user=postgres dbname=letsgo sslmode=disable")
+	var err error
+    db, err = sqlx.Connect("postgres", "user=postgres dbname=letsgo sslmode=disable")
     if err != nil {
         log.Fatalln(err)
     }
@@ -112,7 +143,7 @@ func main() {
 	http.HandleFunc("/restaurants/", getRestaurants)
 	http.HandleFunc("/users/new/", newUser)
 	http.HandleFunc("/users/save/", saveUser)
-	// http.HandleFunc("/users/viewAll/", viewUser)
+	http.HandleFunc("/users/viewAll/", viewAllUsers)
 	http.Handle("/login/", http.StripPrefix("/login/", http.FileServer(http.Dir("./"))))
 	http.ListenAndServe(":8080", nil)
 }
