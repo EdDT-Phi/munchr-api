@@ -1,0 +1,32 @@
+DROP TABLE users;
+CREATE TABLE users (
+    user_id     serial,
+    fb_id       text,
+    first_name  text,
+    last_name   text,
+    email       text,
+    password    text
+);
+
+INSERT INTO users (first_name, last_name, fb_id, email, password) VALUES ('Tyler', 'Camp', '123456', 'hugh@mungus.tr', 'trung tran');
+
+
+
+DROP TABLE place;
+CREATE TABLE place (
+    place_id    serial,
+    name        text,
+    lat         float,
+    long        float
+);
+
+
+DROP TABLE likes;
+CREATE TABLE likes (
+    user_id     uuid,
+    place_id    uuid,
+    swipe       boolean,
+    liked       boolean,
+    rating      int,
+    times       int
+)
