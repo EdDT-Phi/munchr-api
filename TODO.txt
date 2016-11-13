@@ -1,1 +1,3 @@
-password!! remeber to hash and use ssl and salts!!!
+Enable SSL
+Enable oauth-2: http://flask-oauthlib.readthedocs.io/en/latest/oauth2.html
+remove friends
