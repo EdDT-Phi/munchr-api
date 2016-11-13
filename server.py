@@ -19,14 +19,6 @@ print ('Connected to database')
 
 
 google_url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=%s,%s&radius=%d&keyword=%s&minprice=%d&maxprice=%dtype=restaurant&opennow=true&key=AIzaSyAYtekAb_1WMTW3S4VhdylPOBpf1QeNIIo'
-
-lat = '30.287235'
-lng = '-97.744111'
-rad = 2
-kwrd = 'burgers'
-minprice = 0
-maxprice = 4
-
 radius_conv = {1: 1000, 2: 5000, 3: 10000}
 
 @app.route('/restaurants/', methods=['GET','POST'])
@@ -58,6 +50,7 @@ def getRestaurants():
 	print(data)
 	return jsonify(**data)
 
+
 check_login = 'SELECT password, user_id FROM users WHERE email = \'%s\''
 
 @app.route('/login/', methods=['GET', 'POST'])
@@ -72,10 +65,7 @@ def login():
 	if email is None: return jsonify(error='missing email')
 	if password is None: return jsonify(error='missing password')
 
-	cursor = conn.cursor()
-	cursor.execute(check_login % email)
-	
-	db_pass = cursor.fetchall()
+	db_pass = select_query(check_login % email)
 	print(db_pass)
 	if len(db_pass) == 0: jsonify(error='email not in database')
 	if not bcrypt.check_password_hash(db_pass[0][0], password):
@@ -111,69 +101,75 @@ def friends(user_id=None):
 			return jsonify(error='must provide valid user_ids')
 
 		# Verfiy users exist
-		cursor = conn.cursor()
-		query = verify_users % (user_id1, user_id2)
-		cursor.execute(query)
-		resp = cursor.fetchall()
+		resp = select_query(verify_users % user_id1, user_id2)
 		if len(resp) != 2:
-			cursor.close()
 			return jsonify(error='one or both user_ids do not exist')
 
 		# Verify users not friends
-		query = check_not_already_friends % (user_id1, user_id2)
-		cursor.execute(query)
-		resp = cursor.fetchall()
+		resp = select_query(check_not_already_friends % (user_id1, user_id2))
 		if len(resp) != 0:
-			cursor.close()
 			return jsonify(error='users already friends')
 
 		# Add friend
-		query = add_friend % (user_id1, user_id2)
-		cursor.execute(query)
-		cursor.close()
-		conn.commit()
+		insert_query(add_friend % (user_id1, user_id2))
 
 		return jsonify(success=True)
 
-	cursor = conn.cursor()
-	query = view_friends % user_id
-	cursor.execute(query)
-	resp = cursor.fetchall()
-
+	resp = select_query(view_friends % user_id)
 	friends = []
-	ls = 'AND NOT (user_id in ('
-	for user in resp:
-		ls += str(user[0]) + ','
-		friends.append({'user_id': user[0], 'first_name': user[1], 'last_name': user[2]})
+	add_rows_to_list(resp, friends, ('user_id', 'first_name', 'last_name'))
 
-	ls = ls[:len(ls)-1] + '))'
-
+	print(friends)
 	if len(friends) == 0:
 		ls = ''
-	query = added_me % (user_id, ls)
-	cursor.execute(query)
-	resp = cursor.fetchall()
-	cursor.close()
-
+	else:
+		ls = 'AND NOT (user_id in ('
+		for friend in friends:
+			ls += '%s,' % friend['user_id']
+		ls = ls[:len(ls)-1] + '))'
+	
+	resp = select_query(added_me % (user_id, ls))
 	non_friends = []
-	for user in resp:
-		non_friends.append({'user_id': user[0], 'first_name': user[1], 'last_name': user[2]})
+	add_rows_to_list(resp, non_friends, ('user_id', 'first_name', 'last_name'))
 
 	return Response(json.dumps({'friends':friends, 'non_friends':non_friends}),  mimetype='application/json')
 
-search_query = ''
 
-@app.route('/users/search/<string:query>')
-def users_search(query):
-	# seach among friends
-	# search among friends freinds
+search_friends = 'SELECT user_id, first_name, last_name, email FROM friends JOIN users ON user_id2 = user_id WHERE user_id1 = %d AND (first_name = \'%s\' OR last_name = \'%s\'OR email LIKE \'%s%%\' OR first_name LIKE \'%s%%\' OR last_name LIKE \'%s%%\')'
+search_all = 'SELECT user_id, first_name, last_name, email FROM users WHERE (first_name = \'%s\' OR last_name = \'%s\'OR email LIKE \'%s%%\' OR first_name LIKE \'%s%%\' OR last_name LIKE \'%s%%\')'
+@app.route('/users/search/', methods=['GET', 'POST'])
+def users_search():
+	if request.method == 'GET':
+		return render_template('search.html')
+
+	query = get_field(request, 'query')
+	user_id, err = get_num(request, 'user_id')
+
+	if err is not None:
+		return jsonify(error=err)
+
+	if query is None: return jsonify(error='query required')
+	if user_id is None: return jsonify(error='user_id required')
+
+	query = query.lower()
+
+	results = []
+	# search among friends
+	# rows = select_query(search_friends % (user_id, to_name(query), to_name(query), query,  to_name(query), to_name(query)))
+	# add_rows_to_list(rows, results, ('user_id', 'first_name', 'last_name', 'email'))
+
+	# search among friends' friends
+
 	# search among all users
+	rows = select_query(search_all % (to_name(query), to_name(query), query,  to_name(query), to_name(query)))
+	add_rows_to_list(rows, results, ('user_id', 'first_name', 'last_name', 'email'))
+	return Response(json.dumps(results), mimetype='application/json')
+
 
 
 new_user = 'INSERT INTO users (first_name, last_name, fb_id, email, password) VALUES (\'%s\', \'%s\', \'%s\', \'%s\', \'%s\')'
 show_all_users = 'SELECT * from users ORDER BY user_id DESC'
 show_user = 'SELECT * from users WHERE user_id = %d'
-
 @app.route('/users/', methods=['GET', 'POST'])
 @app.route('/users/<int:user_id>')
 def users(user_id=None):
@@ -193,32 +189,21 @@ def users(user_id=None):
 		else:
 			password = generate_password_hash(password, 12)
 
-		print('%s\n%s\n%s\n%s\n%s' % (first_name, last_name, fb_id, email, password.decode('UTF-8')))
-		
-		try:
-			cursor = conn.cursor()
-			query = new_user % (first_name, last_name, fb_id, email, password.decode('UTF-8'))
-			cursor.execute(query)
-			cursor.close()
-			conn.commit()
-		except:
-			print("FAILED TO ADD USER")
-			raise
+		first_name = to_name(first_name)
+		last_name = to_name(last_name)
+		email = email.lower()
+
+		print('%s\n%s\n%s\n%s\n%s\n%s' % (first_name, last_name, fb_id, email, password.decode('UTF-8')))		
+		insert_query(new_user % (first_name, last_name, fb_id, email, password.decode('UTF-8')))
 
 		return jsonify(success=True)
 
 
 	query = show_all_users
 	if user_id is not None:
-		query = show_user % user_id	
-	try:
-		cursor = conn.cursor()
-		cursor.execute(query)
-		response = cursor.fetchall()
-		cursor.close()
-	except:
-		print ("FAILED TO GET USERS")
-		raise
+		query = show_user % user_id
+
+	response = select_query(query)
 
 	return  Response(json.dumps(response),  mimetype='application/json')
 
@@ -246,6 +231,35 @@ def get_num(request, field, min=0, max=1000000):
 
 	return (ret, None)
 
+
+def select_query(query):
+	cursor = conn.cursor()
+	cursor.execute(query)
+	rows = cursor.fetchall()
+	cursor.close()
+	return rows
+
+def insert_query(query):
+	cursor = conn.cursor()
+	cursor.execute(query)
+	cursor.close()
+	conn.commit()
+
+def add_rows_to_list(rows, lst, values):
+	for row in rows:
+		obj = {}
+		for i in range(len(row)):
+			obj[values[i]] = row[i]
+		lst.append(obj)
+
+def to_name(name):
+	return name[0].upper() + name[1:].lower()
+
+def full_name(query):
+	query = query.split(' ')
+	for q in query:
+		q = to_name(q)
+	return ' '.join(query)
 
 if __name__ == '__main__':
 	app.run()
