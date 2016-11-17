@@ -2,12 +2,11 @@ def login():
 	if request.method == 'GET':
 		return render_template('login.html')
 
+	email, err = get_field(request, 'email', required=True)
+	password, err = get_field(request, 'password', required=True)
 
-	email = get_field(request, 'email')
-	password = get_field(request, 'password')
-
-	if email is None: return jsonify(error='missing email')
-	if password is None: return jsonify(error='missing password')
+  if err is not None:
+    return jsonify(error=err)
 
 	db_pass = select_query(check_login % email)
 	print(db_pass)
@@ -18,8 +17,8 @@ def login():
 	return jsonify(success=True, user_id=db_pass[0][1])
 
 def new_friend(request):
-	user_id1, err = get_num(request, 'user_id1')
-	user_id2, err = get_num(request, 'user_id2')
+	user_id1, err = get_num(request, 'user_id1', required=True)
+	user_id2, err = get_num(request, 'user_id2', required=True)
 
 	if err is not None:
 		return jsonify(error=err)
@@ -63,20 +62,13 @@ def get_friends(request, user_id):
 	return Response(json.dumps({'friends':friends, 'non_friends':non_friends}),  mimetype='application/json')
 
 def search_users(request):
-	if request.method == 'GET':
-		return render_template('search.html')
-
-	query = get_field(request, 'query')
-	user_id, err = get_num(request, 'user_id')
+	query, err = get_field(request, 'query', required=True)
+	user_id, err = get_num(request, 'user_id', required=True)
 
 	if err is not None:
 		return jsonify(error=err)
 
-	if query is None: return jsonify(error='query required')
-	if user_id is None: return jsonify(error='user_id required')
-
 	query = query.lower()
-
 	results = []
 	# search among friends
 	# rows = select_query(search_friends % (user_id, to_name(query), to_name(query), query,  to_name(query), to_name(query)))
@@ -90,15 +82,15 @@ def search_users(request):
 	return Response(json.dumps(results), mimetype='application/json')
 
 def new_user(request):
-	first_name = get_field(request, 'first_name')
-	last_name = get_field(request, 'last_name')
-	fb_id = get_field(request, 'fb_id')
-	email = get_field(request, 'email')
-	password = get_field(request, 'password')
+  first_name, err = get_field(request, 'first_name', required=True)
+  last_name, err = get_field(request, 'last_name', required=True)
+  email, err = get_field(request, 'email', required=True)
+  password, err = get_field(request, 'password')
+  fb_id, err = get_field(request, 'fb_id')
 
-	if first_name is None: return jsonify(error='first_name required')
-	if last_name is None: return jsonify(error='last_name required')
-	if email is None: return jsonify(error='email required')
+  if err is not None:
+    return jsonify(error=err)
+
 	if password is None: 
 		if fb_id is None: return jsonify(error='password or fb_id required')
 	else:
