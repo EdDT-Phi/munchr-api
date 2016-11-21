@@ -1,3 +1,5 @@
+from db_helper import conn
+
 def get_field(request, field):
 	ret = request.form[field]
 	if ret == '': return None

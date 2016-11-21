@@ -1,26 +1,17 @@
 from flask import Flask, request, render_template, redirect, url_for, jsonify, Response
-from flask_bcrypt import Bcrypt, generate_password_hash
 from flask_socketio import SocketIO, emit, join_room, leave_room, \
     close_room, rooms, disconnect
-import psycopg2
+from flask_bcrypt import Bcrypt
 import json
 import pdb
 import sys
 import requests
 import utils
+import users
 
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
 socketio = SocketIO(app)
-
-try:
-	conn = psycopg2.connect("dbname='letsgo' user='postgres' host='localhost'")
-except:
-	print ("I am unable to connect to the database")
-	sys.exit(1)
-print ('Connected to database')
-
-
 
 rooms = {}
 
@@ -38,6 +29,8 @@ def getRestaurants():
 
 @app.route('/login/', methods=['GET', 'POST'])
 def login():
+	if request.method == 'GET':
+		return render_template('login.html')
 	return users.login(request)
 
 
@@ -55,19 +48,19 @@ def friends(user_id=None):
 
 @app.route('/users/search/', methods=['GET', 'POST'])
 def users_search():
-	return search_users(request)
+	return users.search_users(request)
 
 
 @app.route('/users/', methods=['GET', 'POST'])
 @app.route('/users/<int:user_id>')
-def users(user_id=None):
+def users_route(user_id=None):
 	if request.method == 'POST':
 		return users.new_user(request)
 
 	if user_id is None:
 		return users.get_all_users(request)
 
-	return get_user(request, user_id)
+	return users.get_user(request, user_id)
 
 
 @socketio.on('my_ping', namespace='/session')
@@ -106,3 +99,4 @@ def join():
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)
+    

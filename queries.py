@@ -12,7 +12,7 @@ search_all = 'SELECT user_id, first_name, last_name, email FROM users WHERE (fir
 
 # User Queries
 new_user = 'INSERT INTO users (first_name, last_name, fb_id, email, password) VALUES (\'%s\', \'%s\', \'%s\', \'%s\', \'%s\')'
-show_all_users = 'SELECT * from users ORDER BY user_id DESC'
-show_user = 'SELECT * from users WHERE user_id = %d'
+show_all_users = 'SELECT first_name, last_name, fb_id, email from users ORDER BY user_id DESC'
+show_user = 'SELECT first_name, last_name, fb_id, email from users WHERE user_id = %d'
 
 check_login = 'SELECT password, user_id FROM users WHERE email = \'%s\''
