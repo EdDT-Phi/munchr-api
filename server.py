@@ -5,9 +5,9 @@ from flask_bcrypt import Bcrypt
 import json
 import pdb
 import sys
-import requests
 import utils
 import users
+import restaurants
 
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
@@ -15,16 +15,12 @@ socketio = SocketIO(app)
 
 rooms = {}
 
-
-google_url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=%s,%s&radius=%d&keyword=%s&minprice=%d&maxprice=%dtype=restaurant&opennow=true&key=AIzaSyAYtekAb_1WMTW3S4VhdylPOBpf1QeNIIo'
-radius_conv = {1: 1000, 2: 5000, 3: 10000}
-
 @app.route('/restaurants/', methods=['GET','POST'])
 def getRestaurants(): 
 	if request.method == 'GET':
 		return render_template('restaurants.html')
 
-	return restaurants.get_retaurants(request)
+	return restaurants.get_restaurants(request)
 
 
 @app.route('/login/', methods=['GET', 'POST'])
@@ -49,7 +45,7 @@ def friends(user_id=None):
 @app.route('/users/search/', methods=['GET', 'POST'])
 def users_search():
 	if request.method == 'GET':
-    	return render_template('search.html')
+		return render_template('search.html')
 	return users.search_users(request)
 
 

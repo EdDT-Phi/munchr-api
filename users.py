@@ -14,8 +14,8 @@ def login(request):
 	email, err = utils.get_field(request, 'email', required=True)
 	password, err = utils.get_field(request, 'password', required=True)
 
-  	if err is not None:
-    	return jsonify(error=err)
+	if err is not None:
+		return jsonify(error=err)
 
 	db_pass = utils.select_query(queries.check_login % email)
 	print(db_pass)
@@ -119,11 +119,12 @@ def new_user(request):
 def get_all_users(request):
 	rows = utils.select_query(queries.show_all_users)
 	result = []
-	utils.add_rows_to_list(rows, result, ('first_name', 'last_name', 'fb_id', 'email'))
+	utils.add_rows_to_list(rows, result, ('first_name', 'last_name', 'fb_id', 'email', 'user_id'))
 	return  Response(json.dumps(result),  mimetype='application/json')
 
 def get_user(request, user_id):
 	rows = utils.select_query(queries.show_user % user_id)
+	if len(rows) ==0: return jsonify(error='No user with that id')
 	result = []
 	utils.add_rows_to_list(rows, result, ('first_name', 'last_name', 'fb_id', 'email'))
 	return  Response(json.dumps(result),  mimetype='application/json')
