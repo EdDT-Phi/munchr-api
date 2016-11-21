@@ -4,3 +4,13 @@ remove friends
 restrict characters to name and last name or do in front end
 sanitize sql input
 verify email
+<<<<<<< HEAD
+=======
+
+recommend based on other user data
+not eat at same place frequently?
+rate restaurant based on not just stars (price, food, stuff)
+  overall
+  optional: evertything else
+  would you go again?
+>>>>>>> 17be64a1f846afc05742e6989f823e7e023326e2

@@ -48,6 +48,8 @@ def friends(user_id=None):
 
 @app.route('/users/search/', methods=['GET', 'POST'])
 def users_search():
+	if request.method == 'GET':
+    	return render_template('search.html')
 	return users.search_users(request)
 
 
