@@ -3,8 +3,9 @@ import requests
 from flask import jsonify
 
 radius_conv = {1: 1000, 2: 5000, 3: 10000}
-google_url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=%s,%s&radius=%d&keyword=%s&minprice=%d&maxprice=%dtype=restaurant&opennow=true&key=AIzaSyAYtekAb_1WMTW3S4VhdylPOBpf1QeNIIo'
-
+google_url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=%s,%s&radius=%d&keyword=%s&minprice=%d&maxprice=%dtype=restaurant&opennow=true&key=%s'
+photos_url = 'https://maps.googleapis.com/maps/api/place/photo?key=%s&photoreference=%s&maxheight=800&maxwidth=800'
+key = 'AIzaSyAYtekAb_1WMTW3S4VhdylPOBpf1QeNIIo'
 
 def get_restaurants(request):
 	lat, err = utils.get_field(request, 'lat', required=True)
@@ -20,9 +21,22 @@ def get_restaurants(request):
 
 	rad = radius_conv[rad]
 	# call google api
-	resp = requests.get(google_url % (lat, lng, rad, kwrd, min_price, max_price))
+	resp = requests.get(google_url % (lat, lng, rad, kwrd, min_price, max_price, key))
 	data = resp.json()
-	return jsonify(**data)
+	print(data)
+
+
+	results = []
+	for restaurant in data['results']:
+		results.append({
+			'id': restaurant['place_id'],
+			'photo': photos_url % (key, restaurant['photos'][0]['photo_reference']),
+			'name': restaurant['name'],
+			'price': restaurant['price_level'],
+
+		});
+
+	return jsonify(results=results)
 
 def swipe_restaurant():
 	liked, err = utils.get_boolean(request, 'liked', required=True)
