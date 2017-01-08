@@ -1,4 +1,4 @@
-from db_helper import conn
+# from server import conn
 
 def get_field(request, field, required=False):
 	try:
@@ -39,20 +39,20 @@ def get_boolean(request, field, required=False):
 	return None, '%s must be true or false'
 
 
-def select_query(query):
+def select_query(query, conn):
 	cursor = conn.cursor()
 	cursor.execute(query)
 	rows = cursor.fetchall()
 	cursor.close()
 	return rows
 
-def insert_query(query):
+def insert_query(query, conn):
 	cursor = conn.cursor()
 	cursor.execute(query)
 	cursor.close()
 	conn.commit()
 
-def modify_query(query):
+def modify_query(query, conn):
 	cursor = conn.cursor()
 	cursor.execute(query)
 	cursor.close()

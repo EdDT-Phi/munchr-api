@@ -1,0 +1,9 @@
+runtime: python27
+api_version: 1
+threadsafe: false
+
+handlers:
+- url: /users/
+  script: server.py
+- url: /login/
+  script: server.py
