@@ -6,6 +6,7 @@ from flaskext.mysql import MySQL
 import json
 import pdb
 import sys
+import logging
 from users import Users
 import restaurants
 
@@ -114,6 +115,11 @@ def create():
 def join():
 	return render_template('join.html')
 
+@app.errorhandler(500)
+def server_error(e):
+    # Log the error and stacktrace.
+    logging.exception('An error occurred during a request.')
+    return 'An internal error occurred.', 500
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)
