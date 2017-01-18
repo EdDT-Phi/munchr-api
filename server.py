@@ -9,15 +9,16 @@ import sys
 import logging
 from users import Users
 import restaurants
+import os
 
 
 app = Flask(__name__)
 # TODO get rid of plaintext password
 mysql = MySQL()
 app.config['MYSQL_DATABASE_USER'] = 'root'
-app.config['MYSQL_DATABASE_PASSWORD'] = 'munchr9gc'
+app.config['MYSQL_DATABASE_PASSWORD'] = os.environ.get('MYSQL_DATABASE_PASSWORD') or '3sV#GH@jB6C}$cuh'
 app.config['MYSQL_DATABASE_DB'] = 'munchr_test'
-app.config['MYSQL_DATABASE_HOST'] = '104.154.230.207'
+app.config['MYSQL_DATABASE_HOST'] = os.environ.get('MYSQL_DATABASE_HOST') or 'localhost'
 mysql.init_app(app)
 
 
