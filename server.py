@@ -16,7 +16,7 @@ CORS(app)
 
 mysql = MySQL()
 app.config['MYSQL_DATABASE_USER'] = 'root'
-app.config['MYSQL_DATABASE_PASSWORD'] = os.environ.get('MYSQL_DATABASE_PASSWORD') or '3sV#GH@jB6C}$cuh'
+app.config['MYSQL_DATABASE_PASSWORD'] = os.environ.get('MYSQL_DATABASE_PASSWORD')
 app.config['MYSQL_DATABASE_DB'] = 'munchr_test'
 app.config['MYSQL_DATABASE_HOST'] = os.environ.get('MYSQL_DATABASE_HOST') or 'localhost'
 mysql.init_app(app)
@@ -97,5 +97,6 @@ def server_error(e):
     return 'An internal error occurred.', 500
 
 if __name__ == "__main__":
-    app.run(debug=True)
+	port = int(os.environ.get('MUNCHR_PORT')) or 5000
+	app.run(debug=(os.environ.get('MUNCHR_PROD') != True), port=port, host='0.0.0.0')
     
