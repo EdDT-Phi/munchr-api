@@ -1,0 +1,15 @@
+# munchr api
+
+## Required Environment Variables
+
+ZOMATO_KEY
+MYSQL_DATABASE_PASSWORD
+MYSQL_DATABASE_HOST
+
+## Installation
+
+pip install -r requirements
+
+## Running
+
+python server.py 
