@@ -1,6 +1,5 @@
 from flask import Flask, request, render_template, redirect, url_for, jsonify, Response
-from flask_socketio import SocketIO, emit, join_room, leave_room, \
-    close_room, rooms, disconnect
+from flask_cors import CORS, cross_origin
 from flask_bcrypt import Bcrypt
 from flaskext.mysql import MySQL
 import json
@@ -13,7 +12,8 @@ import os
 
 
 app = Flask(__name__)
-# TODO get rid of plaintext password
+CORS(app)
+
 mysql = MySQL()
 app.config['MYSQL_DATABASE_USER'] = 'root'
 app.config['MYSQL_DATABASE_PASSWORD'] = os.environ.get('MYSQL_DATABASE_PASSWORD') or '3sV#GH@jB6C}$cuh'
@@ -22,27 +22,35 @@ app.config['MYSQL_DATABASE_HOST'] = os.environ.get('MYSQL_DATABASE_HOST') or 'lo
 mysql.init_app(app)
 
 
-print('Attempting to connect to databse')
-try:
-	conn = mysql.connect()
-except:
-	print ("I am unable to connect to the database")
-	raise
-	sys.exit(1)
-print ('Connected to database')
+# print('Attempting to connect to databse')
+# try:
+# 	conn = mysql.connect()
+# except:
+# 	print ("I am unable to connect to the database")
+# 	sys.exit(1)
+# print ('Connected to database')
+
+conn = None
 
 users = Users(conn, Bcrypt(app))
-socketio = SocketIO(app)
+# socketio = SocketIO(app)
 
 
 # rooms = {}
 
 @app.route('/restaurants/', methods=['GET','POST'])
-def getRestaurants(): 
+def get_restaurants(): 
 	if request.method == 'GET':
 		return render_template('restaurants.html')
-
 	return restaurants.get_restaurants(request)
+
+@app.route('/restaurants/categories', methods=['GET'])
+def get_categories(): 
+	return restaurants.get_categories()
+
+@app.route('/restaurants/cuisines', methods=['GET'])
+def get_cuisines(): 
+	return restaurants.get_cuisines(request)
 
 
 @app.route('/login/', methods=['GET', 'POST'])
@@ -82,46 +90,12 @@ def users_route(user_id=None):
 
 	return users.get_user(request, user_id)
 
-
-@socketio.on('my_ping', namespace='/session')
-def ping_pong():
-    emit('my_pong')
-
-
-@socketio.on('connect', namespace='/session')
-def test_connect():
-    print('connect')
-    emit('my_response', {'data': 'Connected', 'count': 0})
-
-
-@socketio.on('connect_join', namespace='/session')
-def test_message(message):
-    print('connect_join')
-    # session['receive_count'] = session.get('receive_count', 0) + 1
-    emit('my_response',
-         {'data': message['data'], 'count': 420})
-
-
-@app.route('/users/new')
-def newUser():
-	return render_template('new_user.html')
-
-
-@app.route('/session/create')
-def create():
-	return render_template('create_session.html')
-
-
-@app.route('/session/join')
-def join():
-	return render_template('join.html')
-
 @app.errorhandler(500)
 def server_error(e):
     # Log the error and stacktrace.
     logging.exception('An error occurred during a request.')
     return 'An internal error occurred.', 500
 
-if __name__ == '__main__':
-    socketio.run(app, debug=True)
+if __name__ == "__main__":
+    app.run(debug=True)
     

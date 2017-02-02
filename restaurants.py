@@ -1,16 +1,46 @@
 import utils
 import requests
+import os
 from flask import jsonify
 
 radius_conv = {1: 1000, 2: 5000, 3: 10000}
-google_url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=%s,%s&radius=%d&keyword=%s&minprice=%d&maxprice=%dtype=restaurant&opennow=true&key=%s'
-photos_url = 'https://maps.googleapis.com/maps/api/place/photo?key=%s&photoreference=%s&maxheight=800&maxwidth=800'
-key = 'AIzaSyAYtekAb_1WMTW3S4VhdylPOBpf1QeNIIo'
+# google_url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=%s,%s&radius=%d&keyword=%s&minprice=%d&maxprice=%dtype=restaurant&opennow=true&key=%s'
+# photos_url = 'https://maps.googleapis.com/maps/api/place/photo?key=%s&photoreference=%s&maxheight=800&maxwidth=800'
+zomato_search = 'https://developers.zomato.com/api/v2.1/search?lat=%s&lon=%s&radius=%d&sort=%s'
+zomato_categories = 'https://developers.zomato.com/api/v2.1/categories'
+zomato_cuisines = 'https://developers.zomato.com/api/v2.1/cuisines?lat=%s&lon=%s'
+
+def get_cuisines(request):
+	lat, err = utils.get_field(request, 'lat', required=True)
+	lng, err = utils.get_field(request, 'long', required=True)
+	headers = {
+		'user-key': os.environ.get('ZOMATO_KEY')
+	}
+	resp = requests.get(zomato_cuisines % (lat, lng), headers=headers)
+	data = resp.json()
+	results = [];
+	for cuisine in data['cuisines']:
+		results.append(cuisine['cuisine']['cuisine_name'])
+
+	return jsonify(results=results)
+
+def get_categories():
+	headers = {
+		'user-key': os.environ.get('ZOMATO_KEY')
+	}
+	resp = requests.get(zomato_categories, headers=headers)
+	data = resp.json()
+	results = [];
+	for category in data['categories']:
+		results.append(category['categories']['name'])
+
+	return jsonify(results=results)
+
 
 def get_restaurants(request):
 	lat, err = utils.get_field(request, 'lat', required=True)
 	lng, err = utils.get_field(request, 'long', required=True)
-	rad, err = utils.get_num(request, 'radius', 1, 3, required=True)
+	rad, err = utils.get_num(request, 'radius', required=True)
 	kwrd, err = utils.get_field(request, 'keyword', required=True)
 	min_price, err = utils.get_num(request, 'min_price', 0, 4, required=True)
 	max_price, err = utils.get_num(request, 'max_price', min_price, 4, required=True)
@@ -19,22 +49,39 @@ def get_restaurants(request):
 	if err is not None:
 		return jsonify(error=err)
 
-	rad = radius_conv[rad]
 	# call google api
-	resp = requests.get(google_url % (lat, lng, rad, kwrd, min_price, max_price, key))
+	# rad = radius_conv[rad]
+	# resp = requests.get(google_url % (lat, lng, rad, kwrd, min_price, max_price, key))
+	
+	# call zomato api
+	headers = {
+		'user-key': os.environ.get('ZOMATO_KEY')
+	}
+	resp = requests.get(zomato_search % (lat, lng, rad, 'price'), headers=headers)
+
 	data = resp.json()
 	print(data)
 
-
 	results = []
-	for restaurant in data['results']:
+	for restaurant in data['restaurants']:
+		r = restaurant['restaurant']
 		results.append({
-			'id': restaurant['place_id'],
-			'photo': photos_url % (key, restaurant['photos'][0]['photo_reference']),
-			'name': restaurant['name'],
-			'price': restaurant['price_level'],
+			'id': r['id'],
+			'photo':  r['featured_image'], #photos_url % (key, restaurant['photos'][0]['photo_reference']),
+			'name': r['name'],
+			'cuisines': r['cuisines'],
+			'cost': r['average_cost_for_two'],
+			'location': {
+				'locality': r['location']['locality'],
+				'address': r['location']['address'],
+				'lat': r['location']['latitude'],
+				'lon': r['location']['longitude']
+			},
+			'rating': r['user_rating']['aggregate_rating']
 
 		});
+
+
 
 	return jsonify(results=results)
 
