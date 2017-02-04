@@ -4,6 +4,7 @@ def get_field(request, field, required=False):
 	try:
 		ret = request.form[field]
 		if ret == '':
+			print('Empty %s' % field)
 			return None, ('%s is required' % field if required else None)
 		return ret, None
 	except:
