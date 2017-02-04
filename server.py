@@ -57,6 +57,11 @@ def get_cuisines():
 def login():
 	if request.method == 'GET':
 		return render_template('login.html')
+	print('request.data: ' + request.data)
+	print('request.args: ' + request.args)
+	print('request.form: ' + request.form)
+	print('request.files: ' + request.files)
+	print('request.values: ' + request.values)
 	return users.login(request)
 
 
