@@ -22,21 +22,18 @@ app.config['MYSQL_DATABASE_HOST'] = os.environ.get('MYSQL_DATABASE_HOST') or 'lo
 mysql.init_app(app)
 
 
-# print('Attempting to connect to databse')
-# try:
-# 	conn = mysql.connect()
-# except:
-# 	print ("I am unable to connect to the database")
-# 	sys.exit(1)
-# print ('Connected to database')
+print('Attempting to connect to databse')
+try:
+	conn = mysql.connect()
+except:
+	print ("I am unable to connect to the database")
+	sys.exit(1)
+print ('Connected to database')
 
 conn = None
 
 users = Users(conn, Bcrypt(app))
-# socketio = SocketIO(app)
 
-
-# rooms = {}
 
 @app.route('/restaurants/', methods=['GET','POST'])
 def get_restaurants(): 
@@ -58,10 +55,6 @@ def login():
 	if request.method == 'GET':
 		return render_template('login.html')
 	print('request.data: ', request.data)
-	print('request.args: ', request.args)
-	print('request.form: ', request.form)
-	print('request.files: ', request.files)
-	print('request.values: ', request.values)
 	return users.login(request)
 
 
