@@ -3,10 +3,11 @@
 def get_field(request, field, required=False):
 	try:
 		ret = request.form[field]
-		if ret == '': 
+		if ret == '':
 			return None, ('%s is required' % field if required else None)
 		return ret, None
 	except:
+		print('Missing %s' % field)
 		return None, ('%s is required' % field if required else None)
 
 
