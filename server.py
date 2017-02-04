@@ -30,8 +30,6 @@ except:
 	sys.exit(1)
 print ('Connected to database')
 
-conn = None
-
 users = Users(conn, Bcrypt(app))
 
 
@@ -55,6 +53,7 @@ def login():
 	if request.method == 'GET':
 		return render_template('login.html')
 	print('request.data: ', request.data)
+	request.data = json.loads(request.data.decode("utf-8"))
 	return users.login(request)
 
 
