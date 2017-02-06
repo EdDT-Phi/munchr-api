@@ -10,18 +10,19 @@ zomato_search = 'https://developers.zomato.com/api/v2.1/search?lat=%s&lon=%s&rad
 zomato_categories = 'https://developers.zomato.com/api/v2.1/categories'
 zomato_cuisines = 'https://developers.zomato.com/api/v2.1/cuisines?lat=%s&lon=%s'
 
-def get_cuisines(request):
-	lat, err = utils.get_field(request, 'lat', required=True)
-	lng, err = utils.get_field(request, 'long', required=True)
+def get_filters(lat, lng):
 	headers = {
 		'user-key': os.environ.get('ZOMATO_KEY')
 	}
 	resp = requests.get(zomato_cuisines % (lat, lng), headers=headers)
 	data = resp.json()
-	results = [];
+	results = {
+		'cuisines': []
+	}
 	for cuisine in data['cuisines']:
-		results.append(cuisine['cuisine']['cuisine_name'])
+		results['cuisines'].append(cuisine['cuisine']['cuisine_name'])
 
+	results['categories'] = get_categories()
 	return jsonify(results=results)
 
 def get_categories():
@@ -34,17 +35,17 @@ def get_categories():
 	for category in data['categories']:
 		results.append(category['categories']['name'])
 
-	return jsonify(results=results)
+	return results
 
 
 def get_restaurants(request):
-	lat, err = utils.get_field(request, 'lat', required=True)
-	lng, err = utils.get_field(request, 'long', required=True)
-	rad, err = utils.get_num(request, 'radius', required=True)
-	kwrd, err = utils.get_field(request, 'keyword', required=True)
-	min_price, err = utils.get_num(request, 'min_price', 0, 4, required=True)
-	max_price, err = utils.get_num(request, 'max_price', min_price, 4, required=True)
-	user_id, err = utils.get_num(request, 'user_id', required=True)
+	lat = utils.get_field(request, 'lat', required=True)
+	lng = utils.get_field(request, 'long', required=True)
+	rad = utils.get_num(request, 'radius', required=True)
+	kwrd = utils.get_field(request, 'keyword', required=True)
+	min_price = utils.get_num(request, 'min_price', 0, 4, required=True)
+	max_price = utils.get_num(request, 'max_price', min_price, 4, required=True)
+	user_id = utils.get_num(request, 'user_id', required=True)
 
 	if err is not None:
 		return jsonify(error=err)
@@ -86,9 +87,9 @@ def get_restaurants(request):
 	return jsonify(results=results)
 
 def swipe_restaurant():
-	liked, err = utils.get_boolean(request, 'liked', required=True)
-	restaurant_id, err = utils.get_num(request, 'restaurant_id', required=True)
-	user_id, err = utils.get_num(request, 'user_id', required=True)
+	liked = utils.get_boolean(request, 'liked', required=True)
+	restaurant_id = utils.get_num(request, 'restaurant_id', required=True)
+	user_id = utils.get_num(request, 'user_id', required=True)
 
 	if err is not None:
 		return jsonify(error=err)
@@ -98,14 +99,14 @@ def swipe_restaurant():
 
 
 def rate_restaurant():
-	restaurant_id, err = utils.get_num(request, 'restaurant_id', required=True)
-	user_id, err = utils.get_num(request, 'user_id', required=True)
-	overall_rating, err = utils.get_num(request, 'overall_rating', 1, 5, required=True)
-	food_rating, err = utils.get_num(request, 'food_rating', 1, 5)
-	value_rating, err = utils.get_num(request, 'value_rating', 1, 5)
-	service_rating, err = utils.get_num(request, 'service_rating', 1, 5)
-	location_rating, err = utils.get_num(request, 'location_rating', 1, 5)
-	atmosphere_rating, err = utils.get_num(request, 'atmosphere_rating', 1, 5)
+	restaurant_id = utils.get_num(request, 'restaurant_id', required=True)
+	user_id = utils.get_num(request, 'user_id', required=True)
+	overall_rating = utils.get_num(request, 'overall_rating', 1, 5, required=True)
+	food_rating = utils.get_num(request, 'food_rating', 1, 5)
+	value_rating = utils.get_num(request, 'value_rating', 1, 5)
+	service_rating = utils.get_num(request, 'service_rating', 1, 5)
+	location_rating = utils.get_num(request, 'location_rating', 1, 5)
+	atmosphere_rating = utils.get_num(request, 'atmosphere_rating', 1, 5)
 
 	if err is not None:
 		return jsonify(error=err)
