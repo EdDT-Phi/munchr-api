@@ -11,11 +11,10 @@ class Users():
 	def __init__(self, conn, bcrypt):
 		self.conn = conn
 		self.bcrypt = bcrypt
-		
 
 	def login(self, request):
-		email, err = utils.get_field(request, 'email', required=True)
-		password, err = utils.get_field(request, 'password', required=True)
+		email = utils.get_field(request, 'email', required=True)
+		password = utils.get_field(request, 'password', required=True)
 
 		if err is not None:
 			return jsonify(error=err)
@@ -29,11 +28,8 @@ class Users():
 		return jsonify(success=True, user_id=db_pass[0][1])
 
 	def new_friend(self, request):
-		user_id1, err = utils.get_num(request, 'user_id1', required=True)
-		user_id2, err = utils.get_num(request, 'user_id2', required=True)
-
-		if err is not None:
-			return jsonify(error=err)
+		user_id1 = utils.get_num(request, 'user_id1', required=True)
+		user_id2 = utils.get_num(request, 'user_id2', required=True)
 
 		if(user_id1 == user_id2):
 			return jsonify(error='cannot befriend self')
@@ -75,11 +71,8 @@ class Users():
 		return Response(json.dumps({'friends':friends, 'non_friends':non_friends}),  mimetype='application/json')
 
 	def search_users(self, request):
-		query, err = utils.get_field(request, 'query', required=True)
-		user_id, err = utils.get_num(request, 'user_id', required=True)
-
-		if err is not None:
-			return jsonify(error=err)
+		query = utils.get_field(request, 'query', required=True)
+		user_id = utils.get_num(request, 'user_id', required=True)
 
 		query = query.lower()
 		results = []
@@ -96,14 +89,11 @@ class Users():
 
 	def new_user(self, request):
 
-		first_name, err = utils.get_field(request, 'first_name', required=True)
-		last_name, err = utils.get_field(request, 'last_name', required=True)
-		email, err = utils.get_field(request, 'email', required=True)
-		password, err = utils.get_field(request, 'password')
-		fb_id, err = utils.get_field(request, 'fb_id')
-
-		if err is not None:
-			return jsonify(error=err)
+		first_name = utils.get_field(request, 'first_name', required=True)
+		last_name = utils.get_field(request, 'last_name', required=True)
+		email = utils.get_field(request, 'email', required=True)
+		password = utils.get_field(request, 'password')
+		fb_id = utils.get_field(request, 'fb_id')
 
 		if password is None: 
 			if fb_id is None: return jsonify(error='password or fb_id required')

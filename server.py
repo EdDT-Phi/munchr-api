@@ -9,6 +9,8 @@ import logging
 from users import Users
 import restaurants
 import os
+from err import InvalidUsage
+
 
 
 app = Flask(__name__)
@@ -44,13 +46,11 @@ def get_restaurants():
 		return render_template('restaurants.html')
 	return restaurants.get_restaurants(request)
 
-@app.route('/restaurants/categories', methods=['GET'])
-def get_categories(): 
-	return restaurants.get_categories()
-
-@app.route('/restaurants/cuisines', methods=['GET'])
-def get_cuisines(): 
-	return restaurants.get_cuisines(request)
+@app.route('/restaurants/filters', methods=['GET'])
+def get_cuisines():
+	lat = request.args.get("lat")
+	lng = request.args.get("long")
+	return restaurants.get_filters(lat, lng)
 
 
 @app.route('/login/', methods=['GET', 'POST'])
@@ -90,6 +90,12 @@ def users_route(user_id=None):
 
 	return users.get_user(request, user_id)
 
+@app.errorhandler(InvalidUsage)
+def handle_invalid_usage(error):
+    response = jsonify(error.to_dict())
+    response.status_code = error.status_code
+    return response
+
 @app.errorhandler(500)
 def server_error(e):
     # Log the error and stacktrace.
@@ -97,6 +103,6 @@ def server_error(e):
     return 'An internal error occurred.', 500
 
 if __name__ == "__main__":
-	port = int(os.environ.get('MUNCHR_PORT')) or 5000
+	port = int(os.environ.get('MUNCHR_PORT') or 5000)
 	app.run(debug=(os.environ.get('MUNCHR_PROD') != True), port=port, host='0.0.0.0')
     

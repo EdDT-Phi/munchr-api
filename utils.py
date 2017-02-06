@@ -1,14 +1,14 @@
-# from server import conn
+from err import InvalidUsage
 
 def get_field(request, field, required=False):
-	try:
-		ret = request.form[field]
-		if ret == '': 
-			return None, ('%s is required' % field if required else None)
-		return ret, None
-	except:
-		return None, ('%s is required' % field if required else None)
+	if required and (field not in request.form):
+		raise InvalidUsage('%s is required' % field, status_code=400)
 
+	ret = request.form[field]
+	if required and (ret == '' or ret == None):
+		raise InvalidUsage('%s is required' % field, status_code=400)
+
+	return ret
 
 def get_num(request, field, min=0, max=1000000, required=False):
 	ret, err = get_field(request, field, required)
