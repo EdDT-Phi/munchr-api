@@ -17,20 +17,20 @@ app = Flask(__name__)
 CORS(app)
 
 mysql = MySQL()
-app.config['MYSQL_DATABASE_USER'] = 'root'
-app.config['MYSQL_DATABASE_PASSWORD'] = os.environ.get('MYSQL_DATABASE_PASSWORD')
-app.config['MYSQL_DATABASE_DB'] = 'munchr_test'
-app.config['MYSQL_DATABASE_HOST'] = os.environ.get('MYSQL_DATABASE_HOST') or 'localhost'
+app.config['MYSQL_DATABASE_USER'] = os.environ.get('MYSQL_USER')
+app.config['MYSQL_DATABASE_PASSWORD'] = os.environ.get('MYSQL_PASSWORD')
+app.config['MYSQL_DATABASE_DB'] = os.environ.get('MYSQL_DATABASE')
+app.config['MYSQL_DATABASE_HOST'] = os.environ.get('MYSQL_HOST')
+app.config['MYSQL_DATABASE_PORT'] = int(os.environ.get('MYSQL_PORT'))
 mysql.init_app(app)
 
 
 print('Attempting to connect to databse')
 try:
 	conn = mysql.connect()
+	print ('Connected to database')
 except:
 	print ("I am unable to connect to the database")
-	sys.exit(1)
-print ('Connected to database')
 
 users = Users(conn, Bcrypt(app))
 
@@ -52,8 +52,6 @@ def get_cuisines():
 def login():
 	if request.method == 'GET':
 		return render_template('login.html')
-	print('request.data: ', request.data)
-	request.data = json.loads(request.data.decode("utf-8"))
 	return users.login(request)
 
 

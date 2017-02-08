@@ -1,6 +1,6 @@
 import json
 
-from flask import jsonify, Response, render_template
+from flask import jsonify, Response
 from flask_bcrypt import generate_password_hash
 
 import queries
@@ -16,11 +16,7 @@ class Users():
 		email = utils.get_field(request, 'email', required=True)
 		password = utils.get_field(request, 'password', required=True)
 
-		if err is not None:
-			return jsonify(error=err)
-
 		db_pass = utils.select_query(queries.check_login % email, self.conn)
-		print(db_pass)
 		if len(db_pass) == 0: return jsonify(error='email not in database')
 		if not self.bcrypt.check_password_hash(db_pass[0][0], password):
 			return jsonify(error='incorrect password')
