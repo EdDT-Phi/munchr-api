@@ -10,7 +10,13 @@ zomato_search = 'https://developers.zomato.com/api/v2.1/search?lat=%s&lon=%s&rad
 zomato_categories = 'https://developers.zomato.com/api/v2.1/categories'
 zomato_cuisines = 'https://developers.zomato.com/api/v2.1/cuisines?lat=%s&lon=%s'
 
-def get_filters(lat, lng):
+def get_filters(request):
+	# lat = utils.get_field(request, 'lat', required=True)
+	# lng = utils.get_field(request, 'long', required=True)
+
+	lat = 30
+	lng = -97
+
 	headers = {
 		'user-key': os.environ.get('ZOMATO_KEY')
 	}

@@ -41,11 +41,9 @@ def get_restaurants():
 		return render_template('restaurants.html')
 	return restaurants.get_restaurants(request)
 
-@app.route('/restaurants/filters', methods=['GET'])
-def get_cuisines():
-	lat = request.args.get("lat")
-	lng = request.args.get("long")
-	return restaurants.get_filters(lat, lng)
+@app.route('/restaurants/filters', methods=['POST'])
+def get_filters():
+	return restaurants.get_filters(request)
 
 
 @app.route('/login/', methods=['GET', 'POST'])
