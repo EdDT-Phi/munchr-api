@@ -14,8 +14,8 @@ def get_filters(request):
 	# lat = utils.get_field(request, 'lat', required=True)
 	# lng = utils.get_field(request, 'long', required=True)
 
-	lat = 30
-	lng = -97
+	lat = 30.3
+	lng = -97.7
 
 	headers = {
 		'user-key': os.environ.get('ZOMATO_KEY')
