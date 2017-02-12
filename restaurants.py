@@ -10,6 +10,9 @@ zomato_search = 'https://developers.zomato.com/api/v2.1/search?lat=%s&lon=%s&rad
 zomato_categories = 'https://developers.zomato.com/api/v2.1/categories'
 zomato_cuisines = 'https://developers.zomato.com/api/v2.1/cuisines?lat=%s&lon=%s'
 
+zomato_cuisine_ids = {}
+zomato_category_ids = {}
+
 def get_filters(request):
 	# lat = utils.get_field(request, 'lat', required=True)
 	# lng = utils.get_field(request, 'long', required=True)
@@ -27,6 +30,7 @@ def get_filters(request):
 	}
 	for cuisine in data['cuisines']:
 		results['cuisines'].append(cuisine['cuisine']['cuisine_name'])
+		zomato_cuisine_ids[cuisine['cuisine']['cuisine_name']] = cuisine['cuisine']['cuisine_id']
 
 	results['categories'] = get_categories()
 	return jsonify(results=results)
@@ -40,6 +44,7 @@ def get_categories():
 	results = [];
 	for category in data['categories']:
 		results.append(category['categories']['name'])
+		zomato_category_ids[category['categories']['name']] = category['category']['id']
 
 	return results
 
@@ -64,7 +69,9 @@ def get_restaurants(request):
 	headers = {
 		'user-key': os.environ.get('ZOMATO_KEY')
 	}
-	resp = requests.get(zomato_search % (lat, lng, rad, 'price'), headers=headers)
+
+	# zomato takes readius in meters
+	resp = requests.get(zomato_search % (lat, lng, rad * 1000, 'price'), headers=headers)
 
 	data = resp.json()
 	print(data)
