@@ -12,13 +12,7 @@ zomato_categories = 'https://developers.zomato.com/api/v2.1/categories'
 zomato_cuisines = 'https://developers.zomato.com/api/v2.1/cuisines?lat=%s&lon=%s'
 
 
-def get_filters(request):
-	# lat = utils.get_field(request, 'lat', required=True)
-	# lng = utils.get_field(request, 'long', required=True)
-
-	lat = 30.3
-	lng = -97.7
-
+def filters_object(lat=30.3, lng=-97.7):
 	headers = {
 		'user-key': os.environ.get('ZOMATO_KEY')
 	}
@@ -31,7 +25,11 @@ def get_filters(request):
 		results['cuisines'].append(cuisine['cuisine']['cuisine_name'])
 
 	results['categories'] = get_categories()
-	return jsonify(results=results)
+	return results
+
+
+def get_filters(lat=30.3, lng=-97.7):
+	return jsonify(results=filters_object(lat, lng))
 
 
 def get_categories():
@@ -47,14 +45,7 @@ def get_categories():
 	return results
 
 
-def get_restaurants(request):
-	lat = utils.get_field(request, 'lat', required=True)
-	lng = utils.get_field(request, 'long', required=True)
-	rad = utils.get_num(request, 'radius', required=True)
-	kwrd = utils.get_field(request, 'keyword', required=True)
-	min_price = utils.get_num(request, 'min_price', 0, 4, required=True)
-	max_price = utils.get_num(request, 'max_price', min_price, 4, required=True)
-	user_id = utils.get_num(request, 'user_id', required=True)
+def get_restaurants(lat, lng, rad, cuisines, categories, price):
 
 	# call google api
 	# rad = radius_conv[rad]
@@ -91,24 +82,24 @@ def get_restaurants(request):
 	return jsonify(results=results)
 
 
-def swipe_restaurant(request):
-	liked = utils.get_boolean(request, 'liked', required=True)
-	restaurant_id = utils.get_num(request, 'restaurant_id', required=True)
-	user_id = utils.get_num(request, 'user_id', required=True)
+def swipe_restaurant():
+	# liked = utils.get_boolean(request, 'liked', required=True)
+	# restaurant_id = utils.get_num(request, 'restaurant_id', required=True)
+	# user_id = utils.get_num(request, 'user_id', required=True)
 
 	# resp = utils.modify_query(swipe_restaurant % ())
 	return jsonify(success=True)
 
 
-def rate_restaurant(request):
-	restaurant_id = utils.get_num(request, 'restaurant_id', required=True)
-	user_id = utils.get_num(request, 'user_id', required=True)
-	overall_rating = utils.get_num(request, 'overall_rating', 1, 5, required=True)
-	food_rating = utils.get_num(request, 'food_rating', 1, 5)
-	value_rating = utils.get_num(request, 'value_rating', 1, 5)
-	service_rating = utils.get_num(request, 'service_rating', 1, 5)
-	location_rating = utils.get_num(request, 'location_rating', 1, 5)
-	atmosphere_rating = utils.get_num(request, 'atmosphere_rating', 1, 5)
+def rate_restaurant():
+	# restaurant_id = utils.get_num(request, 'restaurant_id', required=True)
+	# user_id = utils.get_num(request, 'user_id', required=True)
+	# overall_rating = utils.get_num(request, 'overall_rating', 1, 5, required=True)
+	# food_rating = utils.get_num(request, 'food_rating', 1, 5)
+	# value_rating = utils.get_num(request, 'value_rating', 1, 5)
+	# service_rating = utils.get_num(request, 'service_rating', 1, 5)
+	# location_rating = utils.get_num(request, 'location_rating', 1, 5)
+	# atmosphere_rating = utils.get_num(request, 'atmosphere_rating', 1, 5)
 
 	# resp = utils.modify_query(rate_restaurant % ())
 	return jsonify(success=True)

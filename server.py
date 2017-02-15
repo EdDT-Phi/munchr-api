@@ -2,9 +2,7 @@ from flask import Flask, request, render_template, redirect, url_for, jsonify, R
 from flask_cors import CORS, cross_origin
 from flask_bcrypt import Bcrypt
 from flaskext.mysql import MySQL
-import json
-import pdb
-import sys
+import utils
 import logging
 from users import Users
 import restaurants
@@ -36,20 +34,38 @@ users = Users(conn, Bcrypt(app))
 @app.route('/restaurants/', methods=['GET', 'POST'])
 def get_restaurants():
 	if request.method == 'GET':
-		return render_template('restaurants.html')
-	return restaurants.get_restaurants(request)
+		return render_template('restaurants.html', data=restaurants.filters_object())
+
+	lat = utils.get_field(request, 'lat', required=True)
+	lng = utils.get_field(request, 'long', required=True)
+	rad = utils.get_num(request, 'radius', required=True)
+	cuisines = utils.get_list(request, 'cuisines', required=True)
+	categories = utils.get_list(request, 'cuisines', required=True)
+	price = utils.get_num(request, 'price', required=True)
+	user_id = utils.get_num(request, 'user_id', required=True)
+
+	return restaurants.get_restaurants(lat, lng, rad, cuisines, categories, price)
 
 
-@app.route('/restaurants/filters', methods=['POST'])
+@app.route('/restaurants/filters', methods=['GET', 'POST'])
 def get_filters():
-	return restaurants.get_filters(request)
+	if request.method == 'GET':
+		return render_template('filters.html')
+
+	# lat = utils.get_field(request, 'lat', required=True)
+	# lng = utils.get_field(request, 'long', required=True)
+
+	return restaurants.get_filters()
 
 
 @app.route('/login/', methods=['GET', 'POST'])
 def login():
 	if request.method == 'GET':
 		return render_template('login.html')
-	return users.login(request)
+
+	email = utils.get_field(request, 'email', required=True)
+	password = utils.get_field(request, 'password', required=True)
+	return users.login(email, password)
 
 
 @app.route('/friends/', methods=['GET', 'POST'])
@@ -59,28 +75,37 @@ def friends(user_id=None):
 		return render_template('new_friend.html')
 
 	if request.method == 'POST':
-		return users.new_friend(request)
+		user_id1 = utils.get_num(request, 'user_id1', required=True)
+		user_id2 = utils.get_num(request, 'user_id2', required=True)
 
-	return users.get_friends(request, user_id)
+		return users.new_friend(user_id1, user_id2)
+
+	return get_friends(request, user_id)
 
 
 @app.route('/users/search/', methods=['GET', 'POST'])
 def users_search():
 	if request.method == 'GET':
 		return render_template('search.html')
-	return users.search_users(request)
+	return search_users(request)
 
 
 @app.route('/users/', methods=['GET', 'POST'])
 @app.route('/users/<int:user_id>')
 def users_route(user_id=None):
 	if request.method == 'POST':
-		return users.new_user(request)
+		first_name = utils.get_field(request, 'first_name', required=True)
+		last_name = utils.get_field(request, 'last_name', required=True)
+		email = utils.get_field(request, 'email', required=True)
+		password = utils.get_field(request, 'password')
+		fb_id = utils.get_field(request, 'fb_id')
+
+		return new_user(first_name, last_name, email, password, fb_id)
 
 	if user_id is None:
-		return users.get_all_users(request)
+		return users.get_all_users()
 
-	return users.get_user(request, user_id)
+	return users.get_user(user_id)
 
 
 @app.errorhandler(InvalidUsage)
@@ -99,4 +124,4 @@ def server_error(e):
 
 if __name__ == "__main__":
 	port = int(os.environ.get('MUNCHR_PORT') or 5000)
-	app.run(debug=(os.environ.get('MUNCHR_PROD') != True), port=port, host='0.0.0.0')
+	app.run(debug=(os.environ.get('MUNCHR_PROD') == 'TRUE'), port=port, host='0.0.0.0')
