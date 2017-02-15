@@ -7,60 +7,6 @@ import queries
 import utils
 
 
-def search_users(request):
-	query = utils.get_field(request, 'query', required=True)
-	user_id = utils.get_num(request, 'user_id', required=True)
-
-	query = query.lower()
-	results = []
-	# search among friends
-	# rows = utils.select_query(search_friends % (user_id, utils.to_name(query), utils.to_name(query), query, utils.to_name(query), utils.to_name(query)))
-	# add_rows_to_list(rows, results, ('user_id', 'first_name', 'last_name', 'email'))
-
-	# search among friends' friends
-
-	# search among all users
-	rows = utils.select_query(queries.search_all % (utils.to_name(query), utils.to_name(query), query,  utils.to_name(query), utils.to_name(query)))
-	utils.add_rows_to_list(rows, results, ('user_id', 'first_name', 'last_name', 'email'))
-	return Response(json.dumps(results), mimetype='application/json')
-
-
-def new_user(first_name, last_name, email, password, fb_id):
-
-	if password is None:
-		if fb_id is None: return jsonify(error='password or fb_id required')
-	else:
-		password = generate_password_hash(password, 12)
-
-	first_name = utils.to_name(first_name)
-	last_name = utils.to_name(last_name)
-	email = email.lower()
-
-	# print('%s\n%s\n%s\n%s\n%s\n%s' % (first_name, last_name, fb_id, email, password.decode('UTF-8')))
-	utils.insert_query(queries.new_user % (first_name, last_name, fb_id, email, password.decode('UTF-8')))
-
-	return jsonify(success=True)
-
-
-def get_friends(user_id):
-	resp = utils.select_query(queries.view_friends % user_id, conn)
-	friends = []
-	utils.add_rows_to_list(resp, friends, ('user_id', 'first_name', 'last_name'))
-
-	print(friends)
-	print(','.join([str(friend['user_id']) for friend in friends]))
-	if len(friends) == 0:
-		ls = ''
-	else:
-		ls = 'AND NOT (user_id in (%s))' % (','.join([str(friend['user_id']) for friend in friends]))
-
-	resp = utils.select_query(queries.added_me % (user_id, ls))
-	non_friends = []
-	utils.add_rows_to_list(resp, non_friends, ('user_id', 'first_name', 'last_name'))
-
-	return Response(json.dumps({'friends': friends, 'non_friends': non_friends}),  mimetype='application/json')
-
-
 class Users:
 	"""docstring for Users"""
 	def __init__(self, conn, bcrypt):
@@ -76,6 +22,58 @@ class Users:
 			return jsonify(error='incorrect password')
 
 		return jsonify(success=True, user_id=db_pass[0][1])
+
+	def new_user(self, first_name, last_name, email, password, fb_id):
+
+		if password is None:
+			if fb_id is None: return jsonify(error='password or fb_id required')
+		else:
+			password = generate_password_hash(password, 12)
+
+		first_name = utils.to_name(first_name)
+		last_name = utils.to_name(last_name)
+		email = email.lower()
+
+		# print('%s\n%s\n%s\n%s\n%s\n%s' % (first_name, last_name, fb_id, email, password.decode('UTF-8')))
+		utils.insert_query(queries.new_user % (first_name, last_name, fb_id, email, password.decode('UTF-8')), self.conn)
+
+		return jsonify(success=True)
+
+	def search_users(self, query, user_id):
+
+		query = query.lower()
+		results = []
+		# search among friends
+		# rows = utils.select_query(
+		# search_friends %
+		# (user_id, utils.to_name(query), utils.to_name(query), query, utils.to_name(query), utils.to_name(query)))
+		# add_rows_to_list(rows, results, ('user_id', 'first_name', 'last_name', 'email'))
+
+		# search among friends' friends
+
+		# search among all users
+		rows = utils.select_query(queries.search_all % (
+		utils.to_name(query), utils.to_name(query), query, utils.to_name(query), utils.to_name(query)), self.conn)
+		utils.add_rows_to_list(rows, results, ('user_id', 'first_name', 'last_name', 'email'))
+		return Response(json.dumps(results), mimetype='application/json')
+
+	def get_friends(self, user_id):
+		resp = utils.select_query(queries.view_friends % user_id, self.conn)
+		friends = []
+		utils.add_rows_to_list(resp, friends, ('user_id', 'first_name', 'last_name'))
+
+		print(friends)
+		print(','.join([str(friend['user_id']) for friend in friends]))
+		if len(friends) == 0:
+			ls = ''
+		else:
+			ls = 'AND NOT (user_id in (%s))' % (','.join([str(friend['user_id']) for friend in friends]))
+
+		resp = utils.select_query(queries.added_me % (user_id, ls))
+		non_friends = []
+		utils.add_rows_to_list(resp, non_friends, ('user_id', 'first_name', 'last_name'))
+
+		return Response(json.dumps({'friends': friends, 'non_friends': non_friends}), mimetype='application/json')
 
 	def new_friend(self, user_id1, user_id2):
 

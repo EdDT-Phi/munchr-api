@@ -1,5 +1,5 @@
-from flask import Flask, request, render_template, redirect, url_for, jsonify, Response
-from flask_cors import CORS, cross_origin
+from flask import Flask, request, render_template, jsonify
+from flask_cors import CORS
 from flask_bcrypt import Bcrypt
 from flaskext.mysql import MySQL
 import utils
@@ -80,14 +80,17 @@ def friends(user_id=None):
 
 		return users.new_friend(user_id1, user_id2)
 
-	return get_friends(request, user_id)
+	return users.get_friends(user_id)
 
 
 @app.route('/users/search/', methods=['GET', 'POST'])
 def users_search():
 	if request.method == 'GET':
 		return render_template('search.html')
-	return search_users(request)
+
+	query = utils.get_field(request, 'query', required=True)
+	user_id = utils.get_num(request, 'user_id', required=True)
+	return users.search_users(query, user_id)
 
 
 @app.route('/users/', methods=['GET', 'POST'])
@@ -100,7 +103,7 @@ def users_route(user_id=None):
 		password = utils.get_field(request, 'password')
 		fb_id = utils.get_field(request, 'fb_id')
 
-		return new_user(first_name, last_name, email, password, fb_id)
+		return users.new_user(first_name, last_name, email, password, fb_id)
 
 	if user_id is None:
 		return users.get_all_users()
