@@ -1,5 +1,6 @@
 from err import InvalidUsage
 
+
 def get_field(request, field, required=False):
 	if required and (field not in request.form):
 		raise InvalidUsage('%s is required' % field, status_code=400)
@@ -8,6 +9,7 @@ def get_field(request, field, required=False):
 	if required and (ret == '' or ret == None):
 		raise InvalidUsage('%s is required' % field, status_code=400)
 	return ret
+
 
 def get_num(request, field, min=0, max=1000000, required=False):
 	ret, err = get_field(request, field, required)
@@ -23,6 +25,7 @@ def get_num(request, field, min=0, max=1000000, required=False):
 		return (None, '%s must be between %d and %d' % (field, min, max))
 
 	return (ret, None)
+
 
 def get_boolean(request, field, required=False):
 	ret, err = get_field(request, field, required)
@@ -45,17 +48,20 @@ def select_query(query, conn):
 	cursor.close()
 	return rows
 
+
 def insert_query(query, conn):
 	cursor = conn.cursor()
 	cursor.execute(query)
 	cursor.close()
 	conn.commit()
 
+
 def modify_query(query, conn):
 	cursor = conn.cursor()
 	cursor.execute(query)
 	cursor.close()
 	conn.commit()
+
 
 def add_rows_to_list(rows, lst, values):
 	for row in rows:
@@ -64,8 +70,10 @@ def add_rows_to_list(rows, lst, values):
 			obj[values[i]] = row[i]
 		lst.append(obj)
 
+
 def to_name(name):
 	return name[0].upper() + name[1:].lower()
+
 
 def full_name(query):
 	query = query.split(' ')

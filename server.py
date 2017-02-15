@@ -11,8 +11,6 @@ import restaurants
 import os
 from err import InvalidUsage
 
-
-
 app = Flask(__name__)
 CORS(app)
 
@@ -24,22 +22,23 @@ app.config['MYSQL_DATABASE_HOST'] = os.environ.get('MYSQL_HOST')
 app.config['MYSQL_DATABASE_PORT'] = int(os.environ.get('MYSQL_PORT'))
 mysql.init_app(app)
 
-
 print('Attempting to connect to databse')
+conn = None
 try:
 	conn = mysql.connect()
-	print ('Connected to database')
+	print('Connected to database')
 except:
-	print ("I am unable to connect to the database")
+	print("I am unable to connect to the database")
 
 users = Users(conn, Bcrypt(app))
 
 
-@app.route('/restaurants/', methods=['GET','POST'])
-def get_restaurants(): 
+@app.route('/restaurants/', methods=['GET', 'POST'])
+def get_restaurants():
 	if request.method == 'GET':
 		return render_template('restaurants.html')
 	return restaurants.get_restaurants(request)
+
 
 @app.route('/restaurants/filters', methods=['POST'])
 def get_filters():
@@ -61,7 +60,7 @@ def friends(user_id=None):
 
 	if request.method == 'POST':
 		return users.new_friend(request)
-		
+
 	return users.get_friends(request, user_id)
 
 
@@ -83,19 +82,21 @@ def users_route(user_id=None):
 
 	return users.get_user(request, user_id)
 
+
 @app.errorhandler(InvalidUsage)
 def handle_invalid_usage(error):
-    response = jsonify(error.to_dict())
-    response.status_code = error.status_code
-    return response
+	response = jsonify(error.to_dict())
+	response.status_code = error.status_code
+	return response
+
 
 @app.errorhandler(500)
 def server_error(e):
-    # Log the error and stacktrace.
-    logging.exception('An error occurred during a request.')
-    return 'An internal error occurred.', 500
+	# Log the error and stacktrace.
+	logging.exception('An error occurred during a request.')
+	return 'An internal error occurred.', 500
+
 
 if __name__ == "__main__":
 	port = int(os.environ.get('MUNCHR_PORT') or 5000)
 	app.run(debug=(os.environ.get('MUNCHR_PROD') != True), port=port, host='0.0.0.0')
-    
