@@ -22,9 +22,9 @@ def get_list(request, field, required=False):
 
 
 def get_num(request, field, min_num=0, max_num=1000000, required=False):
-	ret, err = get_field(request, field, required)
-	if err is not None: return ret, err
-	if ret is None and not required: return None, None
+	ret = get_field(request, field, required)
+	if ret is None and not required:
+		return None
 
 	try:
 		ret = int(ret)

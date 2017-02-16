@@ -1,4 +1,4 @@
-import utils
+# import utils
 import requests
 import os
 from flask import jsonify
@@ -46,10 +46,13 @@ def get_categories():
 
 
 def get_restaurants(lat, lng, rad, cuisines, categories, price):
-
 	# call google api
 	# rad = radius_conv[rad]
 	# resp = requests.get(google_url % (lat, lng, rad, kwrd, min_price, max_price, key))
+
+	print (cuisines, categories)
+
+	# cuisines = [id for ]
 
 	# call zomato api
 	headers = {
