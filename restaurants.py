@@ -1,4 +1,3 @@
-# import utils
 import requests
 import os
 from flask import jsonify
@@ -7,9 +6,10 @@ radius_conv = {1: 1000, 2: 5000, 3: 10000}
 # google_url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=%s,%s&radius=%d&keyword=%s&
 # minprice=%d&maxprice=%dtype=restaurant&opennow=true&key=%s'
 # photos_url = 'https://maps.googleapis.com/maps/api/place/photo?key=%s&photoreference=%s&maxheight=800&maxwidth=800'
-zomato_search = 'https://developers.zomato.com/api/v2.1/search?lat=%s&lon=%s&radius=%d&sort=%s'
+zomato_search = 'https://developers.zomato.com/api/v2.1/search?lat=%s&lon=%s&radius=%d'
 zomato_categories = 'https://developers.zomato.com/api/v2.1/categories'
 zomato_cuisines = 'https://developers.zomato.com/api/v2.1/cuisines?lat=%s&lon=%s'
+zomato_key = os.environ.get('ZOMATO_KEY')
 
 zomato_cuisine_ids = {}
 zomato_category_ids = {}
@@ -26,7 +26,7 @@ def filters_object(lat=30.3, lng=-97.7):
 	}
 	for cuisine in data['cuisines']:
 		results['cuisines'].append(cuisine['cuisine']['cuisine_name'])
-		zomato_cuisine_ids[cuisine['cuisine']['cuisine_name']] = cuisine['cuisine']['cuisine_id']
+		zomato_cuisine_ids[cuisine['cuisine']['cuisine_name']] = str(cuisine['cuisine']['cuisine_id'])
 
 	results['categories'] = get_categories()
 	return results
@@ -45,27 +45,33 @@ def get_categories():
 	results = []
 	for category in data['categories']:
 		results.append(category['categories']['name'])
-		zomato_category_ids[category['categories']['name']] = category['category']['id']
+		zomato_category_ids[category['categories']['name']] = str(category['categories']['id'])
 
 	return results
 
 
-def get_restaurants(lat, lng, rad, cuisines, categories, price):
+def get_restaurants(lat, lng, rad, price, cuisines=None, categories=None):
+	# TODO add to database. if no results, query db
+
 	# call google api
-	# rad = radius_conv[rad]
+	rad *= 1000
 	# resp = requests.get(google_url % (lat, lng, rad, kwrd, min_price, max_price, key))
+	query = zomato_search
 
-	print (cuisines, categories)
-
-	# cuisines = [id for ]
+	if cuisines is not None:
+		query += '&cuisines=' + ','.join([zomato_cuisine_ids[cuisine.strip()] for cuisine in cuisines])
+	if categories is not None:
+		query += '&category=' + ','.join([zomato_category_ids[category.strip()] for category in categories])
 
 	# call zomato api
 	headers = {
-		'user-key': os.environ.get('ZOMATO_KEY')
+		'user-key': zomato_key
 	}
 
 	# zomato takes readius in meters
-	resp = requests.get(zomato_search % (lat, lng, rad * 1000, 'price'), headers=headers)
+	resp = requests.get(query % (lat, lng, rad * 1000), headers=headers)
+
+	print(query)
 
 	data = resp.json()
 	print(data)

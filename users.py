@@ -69,7 +69,7 @@ class Users:
 		else:
 			ls = 'AND NOT (user_id in (%s))' % (','.join([str(friend['user_id']) for friend in friends]))
 
-		resp = utils.select_query(queries.added_me % (user_id, ls))
+		resp = utils.select_query(queries.added_me % (user_id, ls), self.conn)
 		non_friends = []
 		utils.add_rows_to_list(resp, non_friends, ('user_id', 'first_name', 'last_name'))
 

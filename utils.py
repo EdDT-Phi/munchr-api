@@ -12,12 +12,9 @@ def get_field(request, field, required=False):
 
 
 def get_list(request, field, required=False):
-	if required and (field not in request.form):
-		raise InvalidUsage('%s is required' % field, status_code=400)
-
-	ret = request.form[field]
-	if required and (ret == '' or ret is None):
-		raise InvalidUsage('%s is required' % field, status_code=400)
+	ret = get_field(request, field, required)
+	if ret is None or ret == '':
+		return None
 	return ret.split(',')
 
 
