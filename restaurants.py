@@ -52,11 +52,15 @@ def get_categories():
 
 def get_restaurants(lat, lng, rad, price, cuisines=None, categories=None):
 	# TODO add to database. if no results, query db
+	print("args: ", lat, lng, rad, price, cuisines, categories)
+
+	lat = 30.3
+	lng = -97.7
 
 	# call google api
 	rad *= 1000
 	# resp = requests.get(google_url % (lat, lng, rad, kwrd, min_price, max_price, key))
-	query = zomato_search
+	query = zomato_search  % (lat, lng, rad * 1000)
 
 	if cuisines is not None:
 		query += '&cuisines=' + ','.join([zomato_cuisine_ids[cuisine.strip()] for cuisine in cuisines])
@@ -69,12 +73,13 @@ def get_restaurants(lat, lng, rad, price, cuisines=None, categories=None):
 	}
 
 	# zomato takes readius in meters
-	resp = requests.get(query % (lat, lng, rad * 1000), headers=headers)
+	resp = requests.get(query, headers=headers)
+
 
 	print(query)
 
 	data = resp.json()
-	print(data)
+	# print(data)
 
 	results = []
 	for restaurant in data['restaurants']:
