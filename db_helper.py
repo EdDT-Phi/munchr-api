@@ -17,7 +17,7 @@ class MySimpleConnectionPool(ThreadedConnectionPool):
             self._pool.append(conn)
         return conn
 
-postgresUri = os.getenv('POSTGRES_URL', 'postgresql://localhost/datamart')
+postgresUri = os.getenv('DATABASE_URL', 'postgresql://localhost/datamart')
 _db = None
 
 
