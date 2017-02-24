@@ -1,10 +1,9 @@
 from flask import Flask, request, render_template, jsonify
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
-from flaskext.mysql import MySQL
 import utils
 import logging
-from users import Users
+import users
 import restaurants
 import os
 from err import InvalidUsage
@@ -12,23 +11,7 @@ from err import InvalidUsage
 app = Flask(__name__)
 CORS(app)
 
-mysql = MySQL()
-app.config['MYSQL_DATABASE_USER'] = os.environ.get('MYSQL_USER')
-app.config['MYSQL_DATABASE_PASSWORD'] = os.environ.get('MYSQL_PASSWORD')
-app.config['MYSQL_DATABASE_DB'] = os.environ.get('MYSQL_DATABASE')
-app.config['MYSQL_DATABASE_HOST'] = os.environ.get('MYSQL_HOST')
-app.config['MYSQL_DATABASE_PORT'] = int(os.environ.get('MYSQL_PORT'))
-mysql.init_app(app)
-
-print('Attempting to connect to database')
-conn = None
-try:
-    conn = mysql.connect()
-    print('Connected to database')
-except:
-    print("Unable to connect to the database")
-
-users = Users(conn, Bcrypt(app))
+bcrypt = Bcrypt(app)
 
 
 @app.route('/restaurants/', methods=['GET', 'POST'])
@@ -65,7 +48,7 @@ def login():
 
     email = utils.get_field(request, 'email', required=True)
     password = utils.get_field(request, 'password', required=True)
-    return users.login(email, password)
+    return users.login(email, password, bcrypt)
 
 
 @app.route('/friends/', methods=['GET', 'POST'])

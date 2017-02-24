@@ -1,4 +1,5 @@
 from err import InvalidUsage
+from db_helper import get_db
 
 
 def get_field(request, field, required=False):
@@ -48,7 +49,9 @@ def get_boolean(request, field, required=False):
 	return InvalidUsage('%s must be true or false' % field)
 
 
-def select_query(query, conn):
+def select_query(query):
+	db = get_db()
+	conn = db.getconn()
 	cursor = conn.cursor()
 	cursor.execute(query)
 	rows = cursor.fetchall()
@@ -56,14 +59,18 @@ def select_query(query, conn):
 	return rows
 
 
-def insert_query(query, conn):
+def insert_query(query):
+	db = get_db()
+	conn = db.getconn()
 	cursor = conn.cursor()
 	cursor.execute(query)
 	cursor.close()
 	conn.commit()
 
 
-def modify_query(query, conn):
+def modify_query(query):
+	db = get_db()
+	conn = db.getconn()
 	cursor = conn.cursor()
 	cursor.execute(query)
 	cursor.close()
@@ -83,7 +90,5 @@ def to_name(name):
 
 
 def full_name(query):
-	query = query.split(' ')
-	for q in query:
-		q = to_name(q)
+	query = [to_name(name) for name in query.split(' ')]
 	return ' '.join(query)

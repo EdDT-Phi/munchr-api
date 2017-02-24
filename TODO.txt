@@ -1,7 +1,4 @@
-Enable SSL
-Enable oauth-2: http://flask-oauthlib.readthedocs.io/en/latest/oauth2.html
 remove friends
-restrict characters to name and last name or do in front end
 sanitize sql input
 verify email
 
