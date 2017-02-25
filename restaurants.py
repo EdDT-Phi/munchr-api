@@ -2,17 +2,36 @@ import requests
 import os
 from flask import jsonify
 
-radius_conv = {1: 1000, 2: 5000, 3: 10000}
+# radius_conv = {1: 1000, 2: 5000, 3: 10000}
 # google_url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=%s,%s&radius=%d&keyword=%s&
 # minprice=%d&maxprice=%dtype=restaurant&opennow=true&key=%s'
 # photos_url = 'https://maps.googleapis.com/maps/api/place/photo?key=%s&photoreference=%s&maxheight=800&maxwidth=800'
 zomato_search = 'https://developers.zomato.com/api/v2.1/search?lat=%s&lon=%s&radius=%d'
 zomato_categories = 'https://developers.zomato.com/api/v2.1/categories'
+zomato_reviews = 'https://developers.zomato.com/api/v2.1/reviews?res_id=%d'
 zomato_cuisines = 'https://developers.zomato.com/api/v2.1/cuisines?lat=%s&lon=%s'
 zomato_key = os.environ.get('ZOMATO_KEY')
 
 zomato_cuisine_ids = {}
 zomato_category_ids = {}
+
+def get_reviews(res_id):
+	headers = {
+		'user-key': os.environ.get('ZOMATO_KEY')
+	}
+	resp = requests.get(zomato_reviews % res_id, headers=headers)
+	data = resp.json()
+
+	results = []
+	for review in data['user_reviews']:
+		review = review['review']
+		results.append({
+				"rating": review['rating'],
+				"review_text": review['review_text'],
+				"review_time_friendly": review['review_time_friendly']
+			})
+
+	return jsonify(results=results)
 
 
 def filters_object(lat=30.3, lng=-97.7):

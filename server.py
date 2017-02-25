@@ -40,6 +40,10 @@ def get_filters():
 
     return restaurants.get_filters()
 
+@app.route('/restaurants/reviews/<int:res_id>')
+def get_reviews(res_id):
+    return restaurants.get_reviews(res_id)
+
 
 @app.route('/login/', methods=['GET', 'POST'])
 def login():
