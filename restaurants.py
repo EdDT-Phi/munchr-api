@@ -12,11 +12,26 @@ zomato_reviews = 'https://developers.zomato.com/api/v2.1/reviews?res_id=%d'
 zomato_cuisines = 'https://developers.zomato.com/api/v2.1/cuisines?lat=%s&lon=%s'
 zomato_key = os.environ.get('ZOMATO_KEY')
 
-bing_images = 'https://api.cognitive.microsoft.com/bing/v5.0/images/search?q=%s&count=5'
+bing_images = 'https://api.cognitive.microsoft.com/bing/v5.0/images/search?q=%s&count=5A'
 bing_key = os.environ.get('BING_KEY')
 
 zomato_cuisine_ids = {}
-zomato_category_ids = {}
+zomato_category_ids = {
+	"Delivery": "1",
+	"Dine-out": "2",
+	"Nightlife": "3",
+	"Catching-up": "4",
+	"Takeaway": "5",
+	"Cafes": "6",
+	"Daily Menus": "7",
+	"Breakfast": "8",
+	"Lunch": "9",
+	"Dinner": "10",
+	"Pubs & Bars": "11",
+	"Premium Delivery": "12",
+	"Pocket Friendly Delivery": "13",
+	"Clubs & Lounges": "14"
+}
 
 def get_reviews(res_id):
 	headers = {
@@ -50,39 +65,33 @@ def get_photos(query):
 	return jsonify(results=results)
 
 
-def filters_object(lat=30.3, lng=-97.7):
+def get_filters(lat=30.3, lng=-97.7):
 	headers = {
 		'user-key': os.environ.get('ZOMATO_KEY')
 	}
 	resp = requests.get(zomato_cuisines % (lat, lng), headers=headers)
 	data = resp.json()
-	results = {
-		'cuisines': []
-	}
+	results = []
 	for cuisine in data['cuisines']:
-		results['cuisines'].append(cuisine['cuisine']['cuisine_name'])
+		results.append(cuisine['cuisine']['cuisine_name'])
 		zomato_cuisine_ids[cuisine['cuisine']['cuisine_name']] = str(cuisine['cuisine']['cuisine_id'])
 
-	results['categories'] = get_categories()
-	return results
+	return jsonify(results=results)
 
 
-def get_filters(lat=30.3, lng=-97.7):
-	return jsonify(results=filters_object(lat, lng))
+# def get_categories():
+# 	headers = {
+# 		'user-key': os.environ.get('ZOMATO_KEY')
+# 	}
+# 	resp = requests.get(zomato_categories, headers=headers)
+# 	data = resp.json()
+# 	results = []
+# 	for category in data['categories']:
+# 		results.append(category['categories']['name'])
+# 		zomato_category_ids[category['categories']['name']] = str(category['categories']['id'])
+# 		print(category['categories']['name'],category['categories']['id'])
 
-
-def get_categories():
-	headers = {
-		'user-key': os.environ.get('ZOMATO_KEY')
-	}
-	resp = requests.get(zomato_categories, headers=headers)
-	data = resp.json()
-	results = []
-	for category in data['categories']:
-		results.append(category['categories']['name'])
-		zomato_category_ids[category['categories']['name']] = str(category['categories']['id'])
-
-	return results
+# 	return results
 
 
 def get_restaurants(lat, lng, rad, price, cuisines=None, categories=None):
@@ -92,8 +101,6 @@ def get_restaurants(lat, lng, rad, price, cuisines=None, categories=None):
 	lat = 30.3
 	lng = -97.7
 
-	# call google api
-	rad *= 1000
 	# resp = requests.get(google_url % (lat, lng, rad, kwrd, min_price, max_price, key))
 	query = zomato_search  % (lat, lng, rad * 1000)
 
