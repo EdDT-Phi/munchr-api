@@ -12,12 +12,15 @@ zomato_reviews = 'https://developers.zomato.com/api/v2.1/reviews?res_id=%d'
 zomato_cuisines = 'https://developers.zomato.com/api/v2.1/cuisines?lat=%s&lon=%s'
 zomato_key = os.environ.get('ZOMATO_KEY')
 
+bing_images = 'https://api.cognitive.microsoft.com/bing/v5.0/images/search?q=%s&count=5'
+bing_key = os.environ.get('BING_KEY')
+
 zomato_cuisine_ids = {}
 zomato_category_ids = {}
 
 def get_reviews(res_id):
 	headers = {
-		'user-key': os.environ.get('ZOMATO_KEY')
+		'user-key': zomato_key
 	}
 	resp = requests.get(zomato_reviews % res_id, headers=headers)
 	data = resp.json()
@@ -30,6 +33,19 @@ def get_reviews(res_id):
 				"review_text": review['review_text'],
 				"review_time_friendly": review['review_time_friendly']
 			})
+
+	return jsonify(results=results)
+
+
+def get_photos(query):
+	print(query)
+	headers = {
+		'Ocp-Apim-Subscription-Key': bing_key
+	}
+	resp = requests.get(bing_images % query, headers=headers)
+	data = resp.json()
+
+	results = [img['contentUrl'] for img in data['value']]
 
 	return jsonify(results=results)
 

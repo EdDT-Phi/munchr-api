@@ -3,8 +3,8 @@
 ## Required Environment Variables
 
 ZOMATO_KEY
-MYSQL_DATABASE_PASSWORD
-MYSQL_DATABASE_HOST
+BING_KEY
+DATABASE_URL
 
 ## Installation
 
