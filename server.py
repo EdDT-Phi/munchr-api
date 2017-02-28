@@ -26,8 +26,10 @@ def get_restaurants():
     categories = utils.get_list(request, 'categories')
     price = utils.get_num(request, 'price', required=True)
     user_id = utils.get_num(request, 'user_id', required=True)
+    limit = utils.get_num(request, 'limit')
+    offset = utils.get_num(request, 'offset')
 
-    return restaurants.get_restaurants(lat, lng, rad, price, cuisines, categories)
+    return restaurants.get_restaurants(lat, lng, rad, price, limit, offset, cuisines, categories)
 
 
 @app.route('/restaurants/filters', methods=['GET', 'POST'])
@@ -35,10 +37,10 @@ def get_filters():
     if request.method == 'GET':
         return render_template('filters.html')
 
-    # lat = utils.get_field(request, 'lat', required=True)
-    # lng = utils.get_field(request, 'long', required=True)
+    lat = utils.get_field(request, 'lat', required=True)
+    lng = utils.get_field(request, 'long', required=True)
 
-    return restaurants.get_filters()
+    return restaurants.get_filters(lat, lng)
 
 
 @app.route('/restaurants/reviews/<int:res_id>')

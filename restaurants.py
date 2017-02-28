@@ -1,18 +1,15 @@
 import requests
 import os
 from flask import jsonify
+import utils
 
-# radius_conv = {1: 1000, 2: 5000, 3: 10000}
-# google_url = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=%s,%s&radius=%d&keyword=%s&
-# minprice=%d&maxprice=%dtype=restaurant&opennow=true&key=%s'
-# photos_url = 'https://maps.googleapis.com/maps/api/place/photo?key=%s&photoreference=%s&maxheight=800&maxwidth=800'
-zomato_search = 'https://developers.zomato.com/api/v2.1/search?lat=%s&lon=%s&radius=%d'
-zomato_categories = 'https://developers.zomato.com/api/v2.1/categories'
-zomato_reviews = 'https://developers.zomato.com/api/v2.1/reviews?res_id=%d'
-zomato_cuisines = 'https://developers.zomato.com/api/v2.1/cuisines?lat=%s&lon=%s'
+zomato_base = 'https://developers.zomato.com/api/v2.1/'
+zomato_search = zomato_base + 'search?lat=%s&lon=%s&radius=%d&start=%d&count=%d'
+zomato_reviews = zomato_base + 'reviews?res_id=%d'
+zomato_cuisines = zomato_base + 'cuisines?lat=%s&lon=%s'
 zomato_key = os.environ.get('ZOMATO_KEY')
 
-bing_images = 'https://api.cognitive.microsoft.com/bing/v5.0/images/search?q=%s&count=5A'
+bing_images = 'https://api.cognitive.microsoft.com/bing/v5.0/images/search?q=%s&count=5'
 bing_key = os.environ.get('BING_KEY')
 
 zomato_cuisine_ids = {}
@@ -53,19 +50,20 @@ def get_reviews(res_id):
 
 
 def get_photos(query):
-	print(query)
 	headers = {
 		'Ocp-Apim-Subscription-Key': bing_key
 	}
 	resp = requests.get(bing_images % query, headers=headers)
 	data = resp.json()
 
+	print(data)
+
 	results = [img['contentUrl'] for img in data['value']]
 
 	return jsonify(results=results)
 
 
-def get_filters(lat=30.3, lng=-97.7):
+def get_filters(lat, lng):
 	headers = {
 		'user-key': os.environ.get('ZOMATO_KEY')
 	}
@@ -79,30 +77,12 @@ def get_filters(lat=30.3, lng=-97.7):
 	return jsonify(results=results)
 
 
-# def get_categories():
-# 	headers = {
-# 		'user-key': os.environ.get('ZOMATO_KEY')
-# 	}
-# 	resp = requests.get(zomato_categories, headers=headers)
-# 	data = resp.json()
-# 	results = []
-# 	for category in data['categories']:
-# 		results.append(category['categories']['name'])
-# 		zomato_category_ids[category['categories']['name']] = str(category['categories']['id'])
-# 		print(category['categories']['name'],category['categories']['id'])
-
-# 	return results
-
-
-def get_restaurants(lat, lng, rad, price, cuisines=None, categories=None):
+def get_restaurants(lat, lng, rad, price, limit=5, offset=0, cuisines=None, categories=None):
 	# TODO add to database. if no results, query db
 	print("args: ", lat, lng, rad, price, cuisines, categories)
 
-	lat = 30.3
-	lng = -97.7
-
 	# resp = requests.get(google_url % (lat, lng, rad, kwrd, min_price, max_price, key))
-	query = zomato_search  % (lat, lng, rad * 1000)
+	query = zomato_search  % (lat, lng, rad * 1000, offset, limit)
 
 	if cuisines is not None:
 		query += '&cuisines=' + ','.join([zomato_cuisine_ids[cuisine.strip()] for cuisine in cuisines])
@@ -126,6 +106,11 @@ def get_restaurants(lat, lng, rad, price, cuisines=None, categories=None):
 	results = []
 	for restaurant in data['restaurants']:
 		r = restaurant['restaurant']
+		if r['featured_image'] == '': continue
+
+		# print(r['location']['latitude'])
+		# print(r['location']['longitude'])
+
 		results.append({
 			'id': r['id'],
 			'photo': r['featured_image'],  # photos_url % (key, restaurant['photos'][0]['photo_reference']),
@@ -138,8 +123,8 @@ def get_restaurants(lat, lng, rad, price, cuisines=None, categories=None):
 				'lat': r['location']['latitude'],
 				'lon': r['location']['longitude']
 			},
-			'rating': r['user_rating']['aggregate_rating']
-
+			'rating': r['user_rating']['aggregate_rating'],
+			'distance': utils.haversine(float(lat), float(lng), float(r['location']['latitude']), float(r['location']['longitude']))
 		})
 
 	return jsonify(results=results)
