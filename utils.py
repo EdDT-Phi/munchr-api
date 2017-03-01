@@ -73,6 +73,7 @@ def select_query(query):
 	cursor.execute(query)
 	rows = cursor.fetchall()
 	cursor.close()
+	db.putconn(conn)
 	return rows
 
 
@@ -83,6 +84,7 @@ def insert_query(query):
 	cursor.execute(query)
 	cursor.close()
 	conn.commit()
+	db.putconn(conn)
 
 
 def modify_query(query):
@@ -92,6 +94,7 @@ def modify_query(query):
 	cursor.execute(query)
 	cursor.close()
 	conn.commit()
+	db.putconn(conn)
 
 
 def add_rows_to_list(rows, lst, values):
