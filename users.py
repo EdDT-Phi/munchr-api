@@ -15,7 +15,17 @@ def login(email, password, bcrypt):
 	if not bcrypt.check_password_hash(db_pass[0][0], password):
 		return jsonify(error='incorrect password')
 
-	return jsonify(success=True, user_id=db_pass[0][1])
+	result = {
+		'user_id': db_pass[0][1],
+		'email': db_pass[0][2],
+		'fb_id': db_pass[0][3],
+		'photo': db_pass[0][4],
+		'first_name': db_pass[0][5],
+		'last_name': db_pass[0][6],
+	}
+
+	return jsonify(result=result)
+
 
 def new_user(first_name, last_name, email, password, fb_id):
 
@@ -31,6 +41,7 @@ def new_user(first_name, last_name, email, password, fb_id):
 	utils.insert_query(queries.new_user % (first_name, last_name, fb_id, email, password.decode('UTF-8')))
 
 	return jsonify(success=True)
+
 
 def search_users(query, user_id):
 

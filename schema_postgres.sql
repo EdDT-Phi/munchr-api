@@ -3,12 +3,13 @@
 
 DROP TABLE IF EXISTS users;
 CREATE TABLE users (
-	user_id     serial,
-	fb_id       text,
+	user_id     serial UNIQUE NOT NULL,
+	fb_id       text UNIQUE,
 	first_name  text NOT NULL,
 	last_name   text NOT NULL,
-	email       varchar(31) UNIQUE NOT NULL,
+	email       text UNIQUE NOT NULL,
 	password    text,
+	photo_url   text,
 	PRIMARY KEY (user_id)
 );
 -- CREATE INDEX ON users (user_id);
