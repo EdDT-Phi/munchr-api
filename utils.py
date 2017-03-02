@@ -70,10 +70,16 @@ def select_query(query):
 	db = get_db()
 	conn = db.getconn()
 	cursor = conn.cursor()
+
 	cursor.execute(query)
 	rows = cursor.fetchall()
+
 	cursor.close()
+	conn.close()
+
 	db.putconn(conn)
+
+
 	return rows
 
 
@@ -81,9 +87,13 @@ def insert_query(query):
 	db = get_db()
 	conn = db.getconn()
 	cursor = conn.cursor()
+
 	cursor.execute(query)
+
 	cursor.close()
 	conn.commit()
+	conn.close()
+
 	db.putconn(conn)
 
 
@@ -91,9 +101,13 @@ def modify_query(query):
 	db = get_db()
 	conn = db.getconn()
 	cursor = conn.cursor()
+
 	cursor.execute(query)
+
 	cursor.close()
 	conn.commit()
+	conn.close()
+
 	db.putconn(conn)
 
 
