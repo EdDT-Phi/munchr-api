@@ -20,8 +20,10 @@ def haversine(lon1, lat1, lon2, lat2):
 
 
 def get_field(request, field, required=False):
-	if required and (field not in request.form):
-		raise InvalidUsage('%s is required' % field, status_code=400)
+	if field not in request.form:
+		if required:
+			raise InvalidUsage('%s is required' % field, status_code=400)
+		return None
 
 	ret = request.form[field]
 	if required and (ret == '' or ret is None):
@@ -79,7 +81,6 @@ def select_query(query):
 
 	db.putconn(conn)
 
-
 	return rows
 
 
@@ -89,12 +90,15 @@ def insert_query(query):
 	cursor = conn.cursor()
 
 	cursor.execute(query)
+	rows = cursor.fetchall()
 
 	cursor.close()
 	conn.commit()
 	conn.close()
 
 	db.putconn(conn)
+
+	return rows
 
 
 def modify_query(query):

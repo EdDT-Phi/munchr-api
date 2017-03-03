@@ -97,8 +97,9 @@ def users_route(user_id=None):
         email = utils.get_field(request, 'email', required=True)
         password = utils.get_field(request, 'password')
         fb_id = utils.get_field(request, 'fb_id')
+        photo = utils.get_field(request, 'photo')
 
-        return users.new_user(first_name, last_name, email, password, fb_id)
+        return users.new_user(first_name, last_name, email, password, fb_id, photo)
 
     if user_id is None:
         return users.get_all_users()

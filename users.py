@@ -27,10 +27,13 @@ def login(email, password, bcrypt):
 	return jsonify(result=result)
 
 
-def new_user(first_name, last_name, email, password, fb_id):
+def new_user(first_name, last_name, email, password, fb_id, photo):
+	print(first_name, last_name, email, password, fb_id, photo);
+
 
 	if password is None:
 		if fb_id is None: return jsonify(error='password or fb_id required')
+		if photo is None: return jsonify(error='photo required with fb_id')
 	else:
 		password = generate_password_hash(password, 12)
 
@@ -38,9 +41,18 @@ def new_user(first_name, last_name, email, password, fb_id):
 	last_name = utils.to_name(last_name)
 	email = email.lower()
 
-	utils.insert_query(queries.new_user % (first_name, last_name, fb_id, email, password.decode('UTF-8')))
+	row = utils.insert_query(queries.new_user % (first_name, last_name, fb_id, email, password.decode('UTF-8'), photo))
 
-	return jsonify(success=True)
+	result = {
+		'user_id': row[0][0],
+		'email': email,
+		'fb_id': fb_id,
+		'photo': photo,
+		'first_name': first_name,
+		'last_name': last_name,
+	}
+
+	return jsonify(result=result)
 
 
 def search_users(query, user_id):
@@ -79,13 +91,14 @@ def get_friends(user_id):
 
 	return Response(json.dumps({'friends': friends, 'non_friends': non_friends}), mimetype='application/json')
 
+
 def new_friend(user_id1, user_id2):
 
 	if user_id1 == user_id2:
 		return jsonify(error='cannot befriend self')
 
-	if user_id1 is None or user_id2 is None:
-		return jsonify(error='must provide valid user_ids')
+	# if user_id1 is None or user_id2 is None:
+		# return jsonify(error='must provide valid user_ids')
 
 	# Verfiy users exist
 	resp = utils.select_query(queries.verify_users % (user_id1, user_id2))
@@ -102,11 +115,13 @@ def new_friend(user_id1, user_id2):
 
 	return jsonify(success=True)
 
+
 def get_all_users():
 	rows = utils.select_query(queries.show_all_users)
 	result = []
 	utils.add_rows_to_list(rows, result, ('first_name', 'last_name', 'fb_id', 'email', 'user_id'))
 	return Response(json.dumps(result),  mimetype='application/json')
+
 
 def get_user(user_id):
 	rows = utils.select_query(queries.show_user % user_id)
