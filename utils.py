@@ -46,10 +46,10 @@ def get_num(request, field, min_num=0, max_num=1000000, required=False):
 	try:
 		ret = int(ret)
 	except:
-		return InvalidUsage('%s must be a number' % field, status_code=400)
+		raise InvalidUsage('%s must be a number' % field, status_code=400)
 
 	if ret > max_num or ret < min_num:
-		return InvalidUsage('%s must be between %d and %d' % (field, min_num, max_num))
+		raise InvalidUsage('%s must be between %d and %d' % (field, min_num, max_num))
 
 	return ret
 

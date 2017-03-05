@@ -2,6 +2,15 @@ import requests
 import os
 from flask import jsonify
 import utils
+from filters import filters
+
+google_base = 'https://maps.googleapis.com/maps/api/place/'
+# minprice and maxprice and opennow
+google_details = google_base + 'details/json?placeid=%s&key=%s'
+google_search = google_base + 'nearbysearch/json?type=restaurant&language=en&rankby=prominence&'\
+	'key=%s&location=%f,%f&radius=%d&keyword=%s'
+google_photos = 'https://maps.googleapis.com/maps/api/place/photo?key=%s&photoreference=%s&maxheight=800&maxwidth=800'
+google_key = os.environ.get('GOOGLE_KEY')
 
 zomato_base = 'https://developers.zomato.com/api/v2.1/'
 zomato_search = zomato_base + 'search?lat=%s&lon=%s&radius=%d&start=%d&count=%d'
@@ -12,23 +21,23 @@ zomato_key = os.environ.get('ZOMATO_KEY')
 bing_images = 'https://api.cognitive.microsoft.com/bing/v5.0/images/search?q=%s&count=5'
 bing_key = os.environ.get('BING_KEY')
 
-zomato_cuisine_ids = {}
-zomato_category_ids = {
-	"Delivery": "1",
-	"Dine-out": "2",
-	"Nightlife": "3",
-	"Catching-up": "4",
-	"Takeaway": "5",
-	"Cafes": "6",
-	"Daily Menus": "7",
-	"Breakfast": "8",
-	"Lunch": "9",
-	"Dinner": "10",
-	"Pubs & Bars": "11",
-	"Premium Delivery": "12",
-	"Pocket Friendly Delivery": "13",
-	"Clubs & Lounges": "14"
-}
+# zomato_cuisine_ids = {}
+# zomato_category_ids = {
+# 	'Delivery': '1',
+# 	'Dine-out': '2',
+# 	'Nightlife': '3',
+# 	'Catching-up': '4',
+# 	'Takeaway': '5',
+# 	'Cafes': '6',
+# 	'Daily Menus': '7',
+# 	'Breakfast': '8',
+# 	'Lunch': '9',
+# 	'Dinner': '10',
+# 	'Pubs & Bars': '11',
+# 	'Premium Delivery': '12',
+# 	'Pocket Friendly Delivery': '13',
+# 	'Clubs & Lounges': '14'
+# }
 
 def get_reviews(res_id):
 	headers = {
@@ -41,10 +50,44 @@ def get_reviews(res_id):
 	for review in data['user_reviews']:
 		review = review['review']
 		results.append({
-				"rating": review['rating'],
-				"review_text": review['review_text'],
-				"review_time_friendly": review['review_time_friendly']
+				'rating': review['rating'],
+				'review_text': review['review_text'],
+				'review_time_friendly': review['review_time_friendly']
 			})
+
+	return jsonify(results=results)
+
+def get_details(res_id):
+
+	query = google_details % (res_id, google_key);
+	print(query)
+
+	resp = requests.get(query)	
+
+	data = resp.json()['result']
+
+
+	results = {
+		'reviews': [],
+		'photos': [],
+		'phone': data['formatted_phone_number'],
+		'opennow': data['opening_hours']['open_now'],
+		'website': data['website'],
+		'price': -1,
+	}
+
+
+	if 'price_level' in data:
+		results['price'] = data['price_level']
+
+	for review in data['reviews']:
+		results['reviews'].append({
+				'rating': review['rating'],
+				'review_text': review['text'],
+				'review_time_friendly': review['time']
+			})
+	for photo in data['photos']:
+		results['photos'].append(google_photos % (google_key, photo['photo_reference']))
 
 	return jsonify(results=results)
 
@@ -56,7 +99,6 @@ def get_photos(query):
 	resp = requests.get(bing_images % query, headers=headers)
 	data = resp.json()
 
-	print(data)
 
 	results = [img['contentUrl'] for img in data['value']]
 
@@ -72,14 +114,55 @@ def get_filters(lat, lng):
 	results = []
 	for cuisine in data['cuisines']:
 		results.append(cuisine['cuisine']['cuisine_name'])
-		zomato_cuisine_ids[cuisine['cuisine']['cuisine_name']] = str(cuisine['cuisine']['cuisine_id'])
+		# zomato_cuisine_ids[cuisine['cuisine']['cuisine_name']] = str(cuisine['cuisine']['cuisine_id'])
 
 	return jsonify(results=results)
 
 
+def get_restaurants2(lat, lng, rad, price, limit=5, offset=0, cuisines=[], categories=[]):
+	if cuisines is None: cuisines = []
+	if categories is None: categories = []
+	
+	query = google_search % (google_key, float(lat), float(lng), rad*1000, '%20'.join(cuisines+categories))
+
+	# zomato takes readius in meters
+	resp = requests.get(query)
+
+
+	print(query)
+
+	data = resp.json()
+
+
+	results = []
+	for restaurant in data['results'][:7]:
+		r = restaurant
+		if 'photos' not in r: continue
+
+		# print(r['location']['latitude'])
+		# print(r['location']['longitude'])
+
+		results.append({
+			'id': r['place_id'],
+			'photo': google_photos % (google_key, restaurant['photos'][0]['photo_reference']),
+			'name': r['name'],
+			'cuisines': r['types'],
+			# 'cost': r['average_cost_for_two'],
+			'location': {
+				'locality': r['vicinity'],
+				'address': r['vicinity'],
+				'lat': r['geometry']['location']['lat'],
+				'lon': r['geometry']['location']['lng']
+			},
+			'rating': r['rating'],
+			'distance': utils.haversine(float(lat), float(lng), r['geometry']['location']['lat'], r['geometry']['location']['lng'])
+		})
+
+	return jsonify(results=results)
+
 def get_restaurants(lat, lng, rad, price, limit=5, offset=0, cuisines=None, categories=None):
 	# TODO add to database. if no results, query db
-	print("args: ", lat, lng, rad, price, cuisines, categories)
+	print('args: ', lat, lng, rad, price, cuisines, categories)
 
 	# resp = requests.get(google_url % (lat, lng, rad, kwrd, min_price, max_price, key))
 	query = zomato_search  % (lat, lng, rad * 1000, offset, limit)

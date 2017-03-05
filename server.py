@@ -17,7 +17,8 @@ bcrypt = Bcrypt(app)
 @app.route('/restaurants/', methods=['GET', 'POST'])
 def get_restaurants():
     if request.method == 'GET':
-        return render_template('restaurants.html', data=restaurants.filters_object())
+        # return render_template('restaurants.html', data=restaurants.get_filters(30.3, -97.7))
+        return render_template('restaurants.html')
 
     lat = utils.get_field(request, 'lat', required=True)
     lng = utils.get_field(request, 'long', required=True)
@@ -29,7 +30,7 @@ def get_restaurants():
     limit = utils.get_num(request, 'limit')
     offset = utils.get_num(request, 'offset')
 
-    return restaurants.get_restaurants(lat, lng, rad, price, limit, offset, cuisines, categories)
+    return restaurants.get_restaurants2(lat, lng, rad, price, limit, offset, cuisines, categories)
 
 
 @app.route('/restaurants/filters', methods=['GET', 'POST'])
@@ -45,7 +46,12 @@ def get_filters():
 
 @app.route('/restaurants/reviews/<int:res_id>')
 def get_reviews(res_id):
-    return restaurants.get_reviews(res_id)
+    return restaurants.get_reviews2(res_id)
+
+
+@app.route('/restaurants/details/<string:place_id>')
+def get_details(place_id):
+    return restaurants.get_details(place_id)
 
 
 @app.route('/restaurants/photos/<string:query>')
