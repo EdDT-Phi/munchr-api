@@ -135,7 +135,7 @@ def get_restaurants2(lat, lng, rad, price, limit=5, offset=0, cuisines=[], categ
 
 
 	results = []
-	for restaurant in data['results'][:7]:
+	for restaurant in data['results'][0:7]:
 		r = restaurant
 		if 'photos' not in r: continue
 
