@@ -53,6 +53,18 @@ def get_num(request, field, min_num=0, max_num=1000000, required=False):
 
 	return ret
 
+def get_float(request, field, required=False):
+	ret = get_field(request, field, required)
+	if ret is None and not required:
+		return None
+
+	try:
+		ret = float(ret)
+	except:
+		raise InvalidUsage('%s must be a float' % field, status_code=400)
+
+	return ret
+
 
 def get_boolean(request, field, required=False):
 	ret = get_field(request, field, required)

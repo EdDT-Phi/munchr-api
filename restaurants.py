@@ -12,32 +12,9 @@ google_search = google_base + 'nearbysearch/json?type=restaurant&language=en&ran
 google_photos = 'https://maps.googleapis.com/maps/api/place/photo?key=%s&photoreference=%s&maxheight=800&maxwidth=800'
 google_key = os.environ.get('GOOGLE_KEY')
 
-# zomato_base = 'https://developers.zomato.com/api/v2.1/'
-# zomato_search = zomato_base + 'search?lat=%s&lon=%s&radius=%d&start=%d&count=%d'
-# zomato_reviews = zomato_base + 'reviews?res_id=%d'
-# zomato_cuisines = zomato_base + 'cuisines?lat=%s&lon=%s'
-# zomato_key = os.environ.get('ZOMATO_KEY')
-
 bing_images = 'https://api.cognitive.microsoft.com/bing/v5.0/images/search?q=%s&count=5'
 bing_key = os.environ.get('BING_KEY')
 
-# def get_reviews(res_id):
-# 	headers = {
-# 		'user-key': zomato_key
-# 	}
-# 	resp = requests.get(zomato_reviews % res_id, headers=headers)
-# 	data = resp.json()
-#
-# 	results = []
-# 	for review in data['user_reviews']:
-# 		review = review['review']
-# 		results.append({
-# 				'rating': review['rating'],
-# 				'review_text': review['review_text'],
-# 				'review_time_friendly': review['review_time_friendly']
-# 			})
-#
-# 	return jsonify(results=results)
 
 def get_details(res_id):
 
@@ -72,44 +49,32 @@ def get_details(res_id):
 	return jsonify(results=results)
 
 
-def get_photos(query):
-	headers = {
-		'Ocp-Apim-Subscription-Key': bing_key
-	}
-	resp = requests.get(bing_images % query, headers=headers)
-	data = resp.json()
+def get_restaurants(lat, lng, rad, price, cuisines):
+	if cuisines is None: cuisines = []
 
+	lists = []
+	rad *= 1000
+	for cuisine in cuisines:
+		query = google_search % (google_key, lat, lng, rad, cuisine)
+		lists.append(get_restaurants_by_cusine(query, lat, lng))
 
-	results = [img['contentUrl'] for img in data['value']]
+	results = []
+	for i in range(20 // len(lists)):
+		for lst in lists:
+			if i < len(lst):
+				results.append(lst[i])
 
 	return jsonify(results=results)
 
 
-# def get_filters(lat, lng):
-# 	headers = {
-# 		'user-key': os.environ.get('ZOMATO_KEY')
-# 	}
-# 	resp = requests.get(zomato_cuisines % (lat, lng), headers=headers)
-# 	data = resp.json()
-# 	results = []
-# 	for cuisine in data['cuisines']:
-# 		results.append(cuisine['cuisine']['cuisine_name'])
-# 		# zomato_cuisine_ids[cuisine['cuisine']['cuisine_name']] = str(cuisine['cuisine']['cuisine_id'])
-#
-# 	return jsonify(results=results)
-
-
-def get_restaurants2(lat, lng, rad, price, cuisines):
-	if cuisines is None: cuisines = []
-
-	query = google_search % (google_key, float(lat), float(lng), rad*1000, '%20'.join(cuisines))
+def get_restaurants_by_cusine(query, lat, lng):
 	print(query)
 
 	resp = requests.get(query)
 	data = resp.json()
 
 	results = []
-	for restaurant in data['results'][0:7]:
+	for restaurant in data['results']:
 		r = restaurant
 		if 'photos' not in r: continue
 
@@ -118,67 +83,15 @@ def get_restaurants2(lat, lng, rad, price, cuisines):
 			'photo': google_photos % (google_key, restaurant['photos'][0]['photo_reference']),
 			'name': r['name'],
 			'location': {
-				'locality': r['vicinity'],
 				'address': r['vicinity'],
 				'lat': r['geometry']['location']['lat'],
 				'lon': r['geometry']['location']['lng']
 			},
-			'rating': r['rating'],
+			'price_level': -1 if 'price_level' not in r else r['price_level'],
+			'rating': -1 if 'rating' not in r else r['rating'],
 			'distance': utils.haversine(float(lat), float(lng), r['geometry']['location']['lat'], r['geometry']['location']['lng'])
 		})
-
-	return jsonify(results=results)
-
-# def get_restaurants(lat, lng, rad, price, limit=5, offset=0, cuisines=None, categories=None):
-# 	print('args: ', lat, lng, rad, price, cuisines, categories)
-#
-# 	# resp = requests.get(google_url % (lat, lng, rad, kwrd, min_price, max_price, key))
-# 	query = zomato_search  % (lat, lng, rad * 1000, offset, limit)
-#
-# 	if cuisines is not None:
-# 		query += '&cuisines=' + ','.join([zomato_cuisine_ids[cuisine.strip()] for cuisine in cuisines])
-# 	if categories is not None:
-# 		query += '&category=' + ','.join([zomato_category_ids[category.strip()] for category in categories])
-#
-# 	# call zomato api
-# 	headers = {
-# 		'user-key': zomato_key
-# 	}
-#
-# 	# zomato takes readius in meters
-# 	resp = requests.get(query, headers=headers)
-#
-#
-# 	print(query)
-#
-# 	data = resp.json()
-# 	# print(data)
-#
-# 	results = []
-# 	for restaurant in data['restaurants']:
-# 		r = restaurant['restaurant']
-# 		if r['featured_image'] == '': continue
-#
-# 		# print(r['location']['latitude'])
-# 		# print(r['location']['longitude'])
-#
-# 		results.append({
-# 			'id': r['id'],
-# 			'photo': r['featured_image'],  # photos_url % (key, restaurant['photos'][0]['photo_reference']),
-# 			'name': r['name'],
-# 			'cuisines': r['cuisines'],
-# 			'cost': r['average_cost_for_two'],
-# 			'location': {
-# 				'locality': r['location']['locality'],
-# 				'address': r['location']['address'],
-# 				'lat': r['location']['latitude'],
-# 				'lon': r['location']['longitude']
-# 			},
-# 			'rating': r['user_rating']['aggregate_rating'],
-# 			'distance': utils.haversine(float(lat), float(lng), float(r['location']['latitude']), float(r['location']['longitude']))
-# 		})
-#
-# 	return jsonify(results=results)
+	return results
 
 
 def swipe_restaurant():

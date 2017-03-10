@@ -20,14 +20,14 @@ def get_restaurants():
         # return render_template('restaurants.html', data=restaurants.get_filters(30.3, -97.7))
         return render_template('restaurants.html')
 
-    lat = utils.get_field(request, 'lat', required=True)
-    lng = utils.get_field(request, 'long', required=True)
+    lat = utils.get_float(request, 'lat', required=True)
+    lng = utils.get_float(request, 'long', required=True)
     rad = utils.get_num(request, 'radius', 1, 20, required=True)
     cuisines = utils.get_list(request, 'cuisines')
     price = utils.get_num(request, 'price', required=True)
     user_id = utils.get_num(request, 'user_id', required=True)
 
-    return restaurants.get_restaurants2(lat, lng, rad, price, cuisines)
+    return restaurants.get_restaurants(lat, lng, rad, price, cuisines)
 
 
 @app.route('/restaurants/filters', methods=['GET', 'POST'])
@@ -41,19 +41,9 @@ def get_filters():
     return restaurants.get_filters(lat, lng)
 
 
-@app.route('/restaurants/reviews/<int:res_id>')
-def get_reviews(res_id):
-    return restaurants.get_reviews2(res_id)
-
-
 @app.route('/restaurants/details/<string:place_id>')
 def get_details(place_id):
     return restaurants.get_details(place_id)
-
-
-@app.route('/restaurants/photos/<string:query>')
-def get_photos(query):
-    return restaurants.get_photos(query)
 
 
 @app.route('/login/', methods=['GET', 'POST'])
