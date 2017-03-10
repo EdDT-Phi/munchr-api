@@ -16,6 +16,9 @@ bing_images = 'https://api.cognitive.microsoft.com/bing/v5.0/images/search?q=%s&
 bing_key = os.environ.get('BING_KEY')
 
 
+def get_filters():
+	return jsonify(results=filters)
+
 def get_details(res_id):
 
 	query = google_details % (res_id, google_key)

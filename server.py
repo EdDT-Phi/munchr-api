@@ -30,15 +30,9 @@ def get_restaurants():
     return restaurants.get_restaurants(lat, lng, rad, price, cuisines)
 
 
-@app.route('/restaurants/filters', methods=['GET', 'POST'])
+@app.route('/restaurants/filters')
 def get_filters():
-    if request.method == 'GET':
-        return render_template('filters.html')
-
-    lat = utils.get_field(request, 'lat', required=True)
-    lng = utils.get_field(request, 'long', required=True)
-
-    return restaurants.get_filters(lat, lng)
+    return restaurants.get_filters()
 
 
 @app.route('/restaurants/details/<string:place_id>')
