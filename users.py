@@ -28,7 +28,7 @@ def login(email, password, bcrypt):
 
 
 def new_user(first_name, last_name, email, password, fb_id, photo):
-	print(first_name, last_name, email, password, fb_id, photo);
+	print(first_name, last_name, email, password, fb_id, photo)
 
 
 	if password is None:

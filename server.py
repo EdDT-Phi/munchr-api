@@ -24,13 +24,10 @@ def get_restaurants():
     lng = utils.get_field(request, 'long', required=True)
     rad = utils.get_num(request, 'radius', 1, 20, required=True)
     cuisines = utils.get_list(request, 'cuisines')
-    categories = utils.get_list(request, 'categories')
     price = utils.get_num(request, 'price', required=True)
     user_id = utils.get_num(request, 'user_id', required=True)
-    limit = utils.get_num(request, 'limit')
-    offset = utils.get_num(request, 'offset')
 
-    return restaurants.get_restaurants2(lat, lng, rad, price, limit, offset, cuisines, categories)
+    return restaurants.get_restaurants2(lat, lng, rad, price, cuisines)
 
 
 @app.route('/restaurants/filters', methods=['GET', 'POST'])

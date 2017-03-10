@@ -95,4 +95,4 @@ filters = [
 "Vegetarian",
 "Venezuelan",
 "Vietnamese"
-];
+]
