@@ -80,12 +80,14 @@ def get_boolean(request, field, required=False):
 	return InvalidUsage('%s must be true or false' % field)
 
 
-def select_query(query):
+def select_query(query, params=None):
 	db = get_db()
 	conn = db.getconn()
 	cursor = conn.cursor()
 
-	cursor.execute(query)
+	print(query)
+	print(params)
+	cursor.execute(query, params)
 	rows = cursor.fetchall()
 
 	cursor.close()
@@ -96,12 +98,12 @@ def select_query(query):
 	return rows
 
 
-def insert_query(query):
+def insert_query(query, params=None):
 	db = get_db()
 	conn = db.getconn()
 	cursor = conn.cursor()
 
-	cursor.execute(query)
+	cursor.execute(query, params)
 	rows = cursor.fetchall()
 
 	cursor.close()
@@ -113,12 +115,12 @@ def insert_query(query):
 	return rows
 
 
-def modify_query(query):
+def modify_query(query, params=None):
 	db = get_db()
 	conn = db.getconn()
 	cursor = conn.cursor()
 
-	cursor.execute(query)
+	cursor.execute(query, params)
 
 	cursor.close()
 	conn.commit()

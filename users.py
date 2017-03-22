@@ -9,7 +9,7 @@ import utils
 
 def login(email, password, bcrypt):
 
-	db_pass = utils.select_query(queries.check_login % email)
+	db_pass = utils.select_query(queries.check_login, (email,))
 	if len(db_pass) == 0:
 		return jsonify(error='email not in database')
 	if not bcrypt.check_password_hash(db_pass[0][0], password):
@@ -68,7 +68,7 @@ def search_users(query, user_id):
 	# search among friends' friends
 
 	# search among all users
-	rows = utils.select_query(queries.search_all % (
+	rows = utils.select_query(queries.search_all, (
 	utils.to_name(query), utils.to_name(query), query, utils.to_name(query), utils.to_name(query)))
 	utils.add_rows_to_list(rows, results, ('user_id', 'first_name', 'last_name', 'email'))
 	return Response(json.dumps(results), mimetype='application/json')

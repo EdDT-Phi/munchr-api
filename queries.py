@@ -21,4 +21,4 @@ new_user = 'INSERT INTO users (first_name, last_name, fb_id, email, password, ph
 show_all_users = 'SELECT first_name, last_name, fb_id, email, user_id from users ORDER BY user_id DESC'
 show_user = 'SELECT first_name, last_name, fb_id, email from users WHERE user_id = %d'
 
-check_login = 'SELECT password, user_id, email, fb_id, photo_url, first_name, last_name FROM users WHERE email = \'%s\''
+check_login = 'SELECT password, user_id, email, fb_id, photo_url, first_name, last_name FROM users WHERE email = %s'
