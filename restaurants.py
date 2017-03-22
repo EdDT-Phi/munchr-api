@@ -57,12 +57,15 @@ def get_restaurants(lat, lng, rad, price, cuisines):
 
 	lists = []
 	rad *= 1000
+	if len(cuisines) == 0:
+		cuisines = ['food']
+
 	for cuisine in cuisines:
-		query = google_search % (google_key, lat, lng, rad, cuisine)
+		query = google_search  % (google_key, lat, lng, rad, cuisine)
 		lists.append(get_restaurants_by_cusine(query, lat, lng))
 
 	results = []
-	for i in range(20 // len(lists)):
+	for i in range(max([len(lst) for lst in lists])):
 		for lst in lists:
 			if i < len(lst):
 				results.append(lst[i])
@@ -77,7 +80,7 @@ def get_restaurants_by_cusine(query, lat, lng):
 	data = resp.json()
 
 	results = []
-	for restaurant in data['results']:
+	for restaurant in data['results'][0:5]:
 		r = restaurant
 		if 'photos' not in r: continue
 

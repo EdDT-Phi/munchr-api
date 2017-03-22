@@ -3,3 +3,4 @@ lib
 __pycache__
 .idea
 dev.sh
+*.sublime-workspace

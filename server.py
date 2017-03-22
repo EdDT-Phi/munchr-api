@@ -110,4 +110,4 @@ def server_error(e):
 
 if __name__ == "__main__":
     port = int(os.environ.get('MUNCHR_PORT') or 5000)
-    app.run(debug=(not os.environ.get('MUNCHR_PROD') == 'FALSE'), port=port, host='0.0.0.0')
+    app.run(debug=(os.environ.get('DEBUG') == 'true'), port=port, host='0.0.0.0')
