@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Cuisine Selection</title>
+
+	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+	<center>
+		<h1>{{ data.name }}</h1>
+		<br>
+		<img height="400" src="{{data.photos[0]}}">
+		<br>
+		<a href="{{data.website}}">Restaurant Website</a>
+	</center>
+
+	<form action='/restaurants/cuisines/qa'>
+
+		<label for="res_id">Place Id</label><br>
+		<input type="text" name="res_id" value="{{ res_id }}">	
+
+		<div class="form-group">
+			<label for="cuisine_1">Primary Cuisine:</label>
+			<select class="form-control" id="cuisine_1" name="cuisine_1">
+				<option>None</option>
+				{% for filter in filters %}
+				<option>{{ filter }}</option>
+				{% endfor %}
+			</select>
+		</div>
+		<div class="form-group">
+			<label for="cuisine_2">Secondary Cuisine:</label>
+			<select class="form-control" id="cuisine_2" name="cuisine_2">
+				<option>None</option>
+				{% for filter in filters %}
+				<option>{{ filter }}</option>
+				{% endfor %}
+			</select>
+		</div>
+		<div class="form-group">
+			<label for="cuisine_3">Tertiary Cuisine:</label>
+			<select class="form-control" id="cuisine_3" name="cuisine_3">
+				<option>None</option>
+				{% for filter in filters %}
+				<option>{{ filter }}</option>
+				{% endfor %}
+			</select>
+		</div>
+		<center>
+			<button formmethod="post" class="btn btn-primary btn-lg btn-block" type="submit">Submit</button>
+		</center>
+	</form>
+
+</body>
+</html>

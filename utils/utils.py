@@ -1,5 +1,5 @@
-from err import InvalidUsage
-from db_helper import get_db
+from utils.err import InvalidUsage
+from utils.db_helper import get_db
 from math import radians, cos, sin, asin, sqrt
 
 
@@ -53,6 +53,7 @@ def get_num(request, field, min_num=0, max_num=1000000, required=False):
 
 	return ret
 
+
 def get_float(request, field, required=False):
 	ret = get_field(request, field, required)
 	if ret is None and not required:
@@ -98,13 +99,15 @@ def select_query(query, params=None):
 	return rows
 
 
-def insert_query(query, params=None):
+def update_query(query, params=None, fetch=False):
 	db = get_db()
 	conn = db.getconn()
 	cursor = conn.cursor()
 
 	cursor.execute(query, params)
-	rows = cursor.fetchall()
+	rows = None
+	if fetch:
+		rows = cursor.fetchall()
 
 	cursor.close()
 	conn.commit()
@@ -113,20 +116,6 @@ def insert_query(query, params=None):
 	db.putconn(conn)
 
 	return rows
-
-
-def modify_query(query, params=None):
-	db = get_db()
-	conn = db.getconn()
-	cursor = conn.cursor()
-
-	cursor.execute(query, params)
-
-	cursor.close()
-	conn.commit()
-	conn.close()
-
-	db.putconn(conn)
 
 
 def add_rows_to_list(rows, lst, values):

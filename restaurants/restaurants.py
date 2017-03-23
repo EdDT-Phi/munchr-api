@@ -1,8 +1,9 @@
 import requests
 import os
 from flask import jsonify
-import utils
-from filters import filters
+
+from utils import queries, utils
+from restaurants.filters import filters
 
 google_base = 'https://maps.googleapis.com/maps/api/place/'
 # minprice and maxprice and opennow
@@ -19,8 +20,8 @@ bing_key = os.environ.get('BING_KEY')
 def get_filters():
 	return jsonify(results=filters)
 
-def get_details(res_id):
 
+def get_details_obj(res_id):
 	query = google_details % (res_id, google_key)
 	print(query)
 
@@ -34,6 +35,7 @@ def get_details(res_id):
 		'opennow': data['opening_hours']['open_now'],
 		'website': data['website'],
 		'price': -1,
+		'name': data['name']
 	}
 
 
@@ -49,6 +51,11 @@ def get_details(res_id):
 	for photo in data['photos']:
 		results['photos'].append(google_photos % (google_key, photo['photo_reference']))
 
+	return results
+
+
+def get_details(res_id):
+	results = get_details_obj(res_id)
 	return jsonify(results=results)
 
 
@@ -78,6 +85,9 @@ def get_restaurants_by_cusine(query, lat, lng):
 
 	resp = requests.get(query)
 	data = resp.json()
+
+	for res in data['results']:
+		utils.update_query(queries.store_seen_ids, {'id': res['place_id']})
 
 	results = []
 	for restaurant in data['results'][0:5]:

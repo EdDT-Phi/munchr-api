@@ -3,8 +3,7 @@ import json
 from flask import jsonify, Response
 from flask_bcrypt import generate_password_hash
 
-import queries
-import utils
+from utils import queries, utils
 
 
 def login(email, password, bcrypt):
@@ -43,7 +42,7 @@ def new_user(first_name, last_name, email, password, fb_id, photo):
 	last_name = utils.to_name(last_name)
 	email = email.lower()
 
-	row = utils.insert_query(queries.new_user % (first_name, last_name, fb_id, email, password.decode('UTF-8'), photo))
+	row = utils.update_query(queries.new_user % (first_name, last_name, fb_id, email, password.decode('UTF-8'), photo))
 
 	result = {
 		'user_id': row[0][0],
@@ -113,7 +112,7 @@ def new_friend(user_id1, user_id2):
 		return jsonify(error='users already friends')
 
 	# Add friend
-	utils.insert_query(queries.add_friend % (user_id1, user_id2))
+	utils.update_query(queries.add_friend, (user_id1, user_id2))
 
 	return jsonify(success=True)
 

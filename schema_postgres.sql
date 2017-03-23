@@ -24,13 +24,12 @@ CREATE TABLE friends (
 -- CREATE INDEX ON friends (user_id2);
 
 
--- DROP TABLE IF EXISTS restaurant;
--- CREATE TABLE restaurant (
--- 	restaurant_id   varchar(31) UNIQUE NOT NULL, -- sane as api id
--- 	cuisine         text NOT NULL,
--- 	vegitarian 		boolean NOT NULL,
--- 	PRIMARY KEY 	(restaurant_id)
--- );
+DROP TABLE IF EXISTS restaurants;
+CREATE TABLE restaurants (
+	restaurant_id   text UNIQUE NOT NULL, -- same as api id
+	cuisine         text,
+	PRIMARY KEY 	(restaurant_id)
+);
 
 
 -- DROP TABLE IF EXISTS swipe;
