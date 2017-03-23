@@ -9,6 +9,8 @@ import utils
 
 def login(email, password, bcrypt):
 
+	email = email.strip().lower()
+
 	db_pass = utils.select_query(queries.check_login, (email,))
 	if len(db_pass) == 0:
 		return jsonify(error='email not in database')
