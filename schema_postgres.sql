@@ -1,4 +1,4 @@
--- gcloud beta sql connect munchr-mysql --user=root
+﻿-- gcloud beta sql connect munchr-mysql --user=root
 
 
 DROP TABLE IF EXISTS users;
@@ -14,6 +14,17 @@ CREATE TABLE users (
 );
 -- CREATE INDEX ON users (user_id);
 
+DROP TABLE IF EXISTS user_ratings;
+CREATE TABLE user_ratings (
+	activity_id	serial UNIQUE NOT NULL,
+	user_id 	int NOT NULL,
+	res_id 		text NOT NULL,
+	liked		boolean NOT NULL,
+	specific	text,
+	review_date timestamp DEFAULT current_timestamp,
+	PRIMARY KEY (activity_id)
+);
+
 
 DROP TABLE IF EXISTS friends;
 CREATE TABLE friends (
@@ -28,48 +39,24 @@ DROP TABLE IF EXISTS restaurants;
 CREATE TABLE restaurants (
 	restaurant_id   text UNIQUE NOT NULL, -- same as api id
 	cuisine         text,
+	name 			text NOT NULL,
 	PRIMARY KEY 	(restaurant_id)
 );
 
-
--- DROP TABLE IF EXISTS swipe;
--- CREATE TABLE swipe (
--- 	user_id         int,
--- 	restaurant_id   int,
--- 	swipe           boolean
--- );
-
-
--- DROP TABLE IF EXISTS rating;
--- CREATE TABLE rating (
---   user_id           int NOT NULL,
---   restaurant_id     int NOT NULL,
---   overall_rating    int NOT NULL,
---   food_rating       int,
---   value_rating      int,
---   service_rating    int,
---   location_rating   int,
---   atmosphere_rating int
--- );
-
-
--- DROP TABLE IF EXISTS likes;
--- CREATE TABLE likes (
--- 	user_id     uuid,
--- 	place_id    uuid,
--- 	swipe       boolean,
--- 	liked       boolean,
--- 	rating      int,
--- 	times       int
--- )
+-- CREATE INDEX ON restaurants (restaurant_id);
 
 INSERT INTO users (first_name, last_name, fb_id, email, password) VALUES ('Tyler', 'Camp', '123456', 'hugh@mungus.tr', '$2b$12$4SsDXvYGvbwCbkxJP1bhIu9vW8V3LMB5/DJbX2DGSCn7X.X0SVeXe');
 INSERT INTO users (first_name, last_name, fb_id, email, password) VALUES ('Eddie', 'Tribaldos', '654321', 'fake@email.ha', '$2b$12$yIq.ZIHyM3eF031mvLW.YOvEXPChnrYv3RVRuCfMk3azLZ/vnPXum');
 INSERT INTO users (first_name, last_name, fb_id, email, password) VALUES ('Nikita', 'Zamwar', '42069', 'princessnikita@chiquita.com', '$2b$12$4SsDXvYGvbwCbkxJP1bhIu9vW8V3LMB5/DJbX2DGSCn7X.X0SVeXe');
 
 INSERT INTO friends (user_id1, user_id2) VALUES (1, 2);
+INSERT INTO friends (user_id1, user_id2) VALUES (2, 1);
 
 INSERT INTO friends (user_id1, user_id2) VALUES (3, 2);
 INSERT INTO friends (user_id1, user_id2) VALUES (3, 1);
 INSERT INTO friends (user_id1, user_id2) VALUES (1, 3);
 INSERT INTO friends (user_id1, user_id2) VALUES (2, 3);
+
+INSERT INTO restaurants (restaurant_id, name) VALUES ('ChIJ9XmrDLC1RIYRKZ6iF4_DV7I', 'The Hightower');
+
+INSERT INTO user_ratings (user_id, res_id, liked, specific) VALUES (3, 'ChIJ9XmrDLC1RIYRKZ6iF4_DV7I', true, 'food')

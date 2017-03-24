@@ -24,6 +24,9 @@ show_user = 'SELECT first_name, last_name, fb_id, email from users WHERE user_id
 check_login = 'SELECT password, user_id, email, fb_id, photo_url, first_name, last_name FROM users WHERE email = %s'
 
 # Restaurant Queries
-store_seen_ids = 'INSERT INTO restaurants (restaurant_id) SELECT %(id)s WHERE NOT EXISTS (SELECT restaurant_id FROM restaurants where restaurant_id = %(id)s);'
+store_seen_ids = 'INSERT INTO restaurants (restaurant_id, name) SELECT %(id)s, %(name)s WHERE NOT EXISTS (SELECT restaurant_id FROM restaurants where restaurant_id = %(id)s);'
 null_cuisines = 'SELECT restaurant_id FROM restaurants WHERE cuisine IS NULL LIMIT 1'
 update_cuisines = 'UPDATE restaurants SET cuisine = %s WHERE restaurant_id = %s'
+
+# User Ratings
+store_new_rating = 'INSERT INTO user_ratings (user_id, res_id, liked, specific) VALUES (%s, %s, %s, %s);'

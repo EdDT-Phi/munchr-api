@@ -1,6 +1,6 @@
 import requests
 import os
-from flask import jsonify
+from flask import jsonify, Blueprint, render_template, request
 
 from utils import queries, utils
 from restaurants.filters import filters
@@ -15,6 +15,35 @@ google_key = os.environ.get('GOOGLE_KEY')
 
 bing_images = 'https://api.cognitive.microsoft.com/bing/v5.0/images/search?q=%s&count=5'
 bing_key = os.environ.get('BING_KEY')
+
+
+restaurants_blueprint = Blueprint('restaurants', __name__)
+
+
+@restaurants_blueprint.route('/restaurants/filters')
+def get_filters():
+    return get_filters()
+
+
+@restaurants_blueprint.route('/restaurants/details/<string:place_id>')
+def get_details(place_id):
+    return get_details(place_id)
+
+
+@restaurants_blueprint.route('/restaurants/', methods=['GET', 'POST'])
+def get_restaurants():
+    if request.method == 'GET':
+        # return render_template('html', data=get_filters(30.3, -97.7))
+        return render_template('html')
+
+    lat = utils.get_float(request, 'lat', required=True)
+    lng = utils.get_float(request, 'long', required=True)
+    rad = utils.get_num(request, 'radius', 1, 20, required=True)
+    cuisines = utils.get_list(request, 'cuisines')
+    price = utils.get_num(request, 'price', required=True)
+    user_id = utils.get_num(request, 'user_id', required=True)
+
+    return get_restaurants(lat, lng, rad, price, cuisines)
 
 
 def get_filters():
@@ -87,7 +116,7 @@ def get_restaurants_by_cusine(query, lat, lng):
 	data = resp.json()
 
 	for res in data['results']:
-		utils.update_query(queries.store_seen_ids, {'id': res['place_id']})
+		utils.update_query(queries.store_seen_ids, {'id': res['place_id'], 'name': res['name']})
 
 	results = []
 	for restaurant in data['results'][0:5]:

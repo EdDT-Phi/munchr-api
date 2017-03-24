@@ -1,19 +1,62 @@
 import json
 
-from flask import jsonify, Response
-from flask_bcrypt import generate_password_hash
+from flask import jsonify, Response, Blueprint, request, render_template
+from flask_bcrypt import generate_password_hash, check_password_hash
 
 from utils import queries, utils
 
 
-def login(email, password, bcrypt):
+users_blueprint = Blueprint('users', __name__)
+
+
+@users_blueprint.route('/login/', methods=['GET', 'POST'])
+def login():
+    if request.method == 'GET':
+        return render_template('login.html')
+
+    email = utils.get_field(request, 'email', required=True)
+    password = utils.get_field(request, 'password', required=True)
+    return login(email, password)
+
+
+
+@users_blueprint.route('/users/search/', methods=['GET', 'POST'])
+def users_search():
+    if request.method == 'GET':
+        return render_template('search.html')
+
+    query = utils.get_field(request, 'query', required=True)
+    user_id = utils.get_num(request, 'user_id', required=True)
+    return search_users(query, user_id)
+
+
+@users_blueprint.route('/users/', methods=['GET', 'POST'])
+@users_blueprint.route('/users/<int:user_id>')
+def users_route(user_id=None):
+    if request.method == 'POST':
+        first_name = utils.get_field(request, 'first_name', required=True)
+        last_name = utils.get_field(request, 'last_name', required=True)
+        email = utils.get_field(request, 'email', required=True)
+        password = utils.get_field(request, 'password')
+        fb_id = utils.get_field(request, 'fb_id')
+        photo = utils.get_field(request, 'photo')
+
+        return new_user(first_name, last_name, email, password, fb_id, photo)
+
+    if user_id is None:
+        return get_all_users()
+
+    return get_user(user_id)
+
+
+def login(email, password):
 
 	email = email.strip().lower()
 
 	db_pass = utils.select_query(queries.check_login, (email,))
 	if len(db_pass) == 0:
 		return jsonify(error='email not in database')
-	if not bcrypt.check_password_hash(db_pass[0][0], password):
+	if not check_password_hash(db_pass[0][0], password):
 		return jsonify(error='incorrect password')
 
 	result = {
@@ -73,48 +116,6 @@ def search_users(query, user_id):
 	utils.to_name(query), utils.to_name(query), query, utils.to_name(query), utils.to_name(query)))
 	utils.add_rows_to_list(rows, results, ('user_id', 'first_name', 'last_name', 'email'))
 	return Response(json.dumps(results), mimetype='application/json')
-
-def get_friends(user_id):
-	resp = utils.select_query(queries.view_friends % user_id)
-	friends = []
-	utils.add_rows_to_list(resp, friends, ('user_id', 'first_name', 'last_name'))
-
-	print(friends)
-	print(','.join([str(friend['user_id']) for friend in friends]))
-	if len(friends) == 0:
-		ls = ''
-	else:
-		ls = 'AND NOT (user_id in (%s))' % (','.join([str(friend['user_id']) for friend in friends]))
-
-	resp = utils.select_query(queries.added_me % (user_id, ls))
-	non_friends = []
-	utils.add_rows_to_list(resp, non_friends, ('user_id', 'first_name', 'last_name'))
-
-	return Response(json.dumps({'friends': friends, 'non_friends': non_friends}), mimetype='application/json')
-
-
-def new_friend(user_id1, user_id2):
-
-	if user_id1 == user_id2:
-		return jsonify(error='cannot befriend self')
-
-	# if user_id1 is None or user_id2 is None:
-		# return jsonify(error='must provide valid user_ids')
-
-	# Verfiy users exist
-	resp = utils.select_query(queries.verify_users % (user_id1, user_id2))
-	if len(resp) != 2:
-		return jsonify(error='one or both user_ids do not exist')
-
-	# Verify users not friends
-	resp = utils.select_query(queries.check_not_already_friends % (user_id1, user_id2))
-	if len(resp) != 0:
-		return jsonify(error='users already friends')
-
-	# Add friend
-	utils.update_query(queries.add_friend, (user_id1, user_id2))
-
-	return jsonify(success=True)
 
 
 def get_all_users():
