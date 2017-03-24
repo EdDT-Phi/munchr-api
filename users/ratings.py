@@ -21,7 +21,7 @@ def user_rating():
 def get_activity(user_id):
 	ratings = utils.select_query(queries.get_activity)
 	results = []
-	utils.add_rows_to_list(ratings, results, ('first_name', 'last_name', 'photo_url', 'liked', 'res_name', 'review_date'))
+	utils.add_rows_to_list(ratings, results, ('first_name', 'last_name', 'photo_url', 'liked', 'res_name', 'review_date', 'user_id'))
 
 	for i in range(len(results)):
 		ago = datetime.now() - results[i]['review_date']
@@ -39,5 +39,11 @@ def get_activity(user_id):
 			results[i]['review_date'] = 'A few minutes ago'
 		else:
 			results[i]['review_date'] = 'A few seconds ago'
+
+		if user_id == results[i]['user_id']:
+			results[i]['first_name'] = 'You'
+			results[i]['last_name'] = ''
+
+		del results[i]['user_id']
 
 	return jsonify(results=results)

@@ -86,8 +86,6 @@ def select_query(query, params=None):
 	conn = db.getconn()
 	cursor = conn.cursor()
 
-	print(query)
-	print(params)
 	cursor.execute(query, params)
 	rows = cursor.fetchall()
 
