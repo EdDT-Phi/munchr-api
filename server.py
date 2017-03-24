@@ -2,6 +2,7 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from users.users import users_blueprint
 from users.friends import friends_blueprint
+from users.ratings import ratings_blueprint
 from restaurants.restaurants import restaurants_blueprint
 from restaurants.restaurants_qa import restaurants_qa_blueprint
 import os
@@ -14,6 +15,7 @@ app.register_blueprint(restaurants_blueprint)
 app.register_blueprint(restaurants_qa_blueprint)
 app.register_blueprint(users_blueprint)
 app.register_blueprint(friends_blueprint)
+app.register_blueprint(ratings_blueprint)
 
 
 @app.errorhandler(InvalidUsage)
