@@ -6,6 +6,7 @@ from users.ratings import ratings_blueprint
 from restaurants.restaurants import restaurants_blueprint
 from restaurants.restaurants_qa import restaurants_qa_blueprint
 import os
+import json
 from utils.err import InvalidUsage
 from utils import utils
 
@@ -21,7 +22,7 @@ app.register_blueprint(ratings_blueprint)
 @app.route('/random', methods=['POST'])
 def users_search():
 	data = utils.get_field(request, 'data')
-	print(data)
+	print(json.dumps(data))
 	return jsonify(success=True)
 
 
