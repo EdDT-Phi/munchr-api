@@ -85,7 +85,7 @@ def new_user(first_name, last_name, email, password, fb_id, photo):
 	last_name = utils.to_name(last_name)
 	email = email.lower()
 
-	row = utils.update_query(queries.new_user % (first_name, last_name, fb_id, email, password.decode('UTF-8'), photo))
+	row = utils.update_query(queries.new_user % (first_name, last_name, fb_id, email, password.decode('UTF-8'), photo), fetch=True)
 
 	result = {
 		'user_id': row[0][0],
