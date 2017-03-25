@@ -13,13 +13,19 @@ CREATE TABLE users (
 
 DROP TABLE IF EXISTS user_ratings;
 CREATE TABLE user_ratings (
-	activity_id	serial UNIQUE NOT NULL,
 	user_id 	int NOT NULL,
 	res_id 		text NOT NULL,
 	liked		boolean NOT NULL,
 	specific	text,
 	review_date timestamp DEFAULT current_timestamp,
-	PRIMARY KEY (activity_id)
+);
+
+
+DROP TABLE IF EXISTS user_swipes;
+CREATE TABLE user_swipes (
+	user_id		int NOT NULL,
+	res_id 		int NOT NULL,
+	swipe_score number DEFAULT = 0
 );
 
 
@@ -34,9 +40,9 @@ CREATE TABLE friends (
 
 DROP TABLE IF EXISTS restaurants;
 CREATE TABLE restaurants (
-	res_id   text UNIQUE NOT NULL, -- same as api id
-	cuisine         text,
-	res_name 			text NOT NULL,
+	res_id   	text UNIQUE NOT NULL, -- same as api id
+	cuisine     text,
+	res_name 	text NOT NULL,
 	PRIMARY KEY 	(res_id)
 );
 
