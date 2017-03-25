@@ -124,7 +124,7 @@ def login_facebook(first_name, last_name, email, fb_id, photo):
 		row = utils.update_query(queries.new_fb_user % (first_name, last_name, fb_id, email, photo), fetch=True)
 		user_id = row[0][0]
 	result = {
-		'user_id': row[0][0],
+		'user_id': user_id,
 		'email': email,
 		'fb_id': fb_id,
 		'photo': photo,
