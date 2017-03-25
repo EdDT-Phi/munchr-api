@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 from users.users import users_blueprint
 from users.friends import friends_blueprint
@@ -7,6 +7,7 @@ from restaurants.restaurants import restaurants_blueprint
 from restaurants.restaurants_qa import restaurants_qa_blueprint
 import os
 from utils.err import InvalidUsage
+from utils import utils
 
 app = Flask(__name__)
 CORS(app)
@@ -16,6 +17,12 @@ app.register_blueprint(restaurants_qa_blueprint)
 app.register_blueprint(users_blueprint)
 app.register_blueprint(friends_blueprint)
 app.register_blueprint(ratings_blueprint)
+
+@app.route('/random', methods=['POST'])
+def users_search():
+	data = utils.get_field(request, 'data')
+	print(data)
+	return jsonify(success=True)
 
 
 @app.errorhandler(InvalidUsage)
