@@ -113,14 +113,16 @@ def login_facebook(first_name, last_name, email, fb_id, photo):
 		fb_l_name = check_login[1]
 		fb_fb_id = check_login[2]
 		fb_email = check_login[3]
+		user_id = check_login[4]
 		if fb_fb_id != None and fb_fb_id != fb_id:
 			return jsonify(error='Another FB user is using that email')
 
 		if fb_f_name != first_name or fb_l_name != last_name:
-			row = utils.update_query(queries.update_user, (first_name, last_name, fb_id, photo, email,), fetch=true)
+			row = utils.update_query(queries.update_user, (first_name, last_name, fb_id, photo, email,), fetch=True)
+			user_id = row[0][0]
 	else:
 		row = utils.update_query(queries.new_fb_user % (first_name, last_name, fb_id, email, photo), fetch=True)
-
+		user_id = row[0][0]
 	result = {
 		'user_id': row[0][0],
 		'email': email,

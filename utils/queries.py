@@ -22,7 +22,7 @@ new_fb_user = 'INSERT INTO users (first_name, last_name, fb_id, email, photo_url
 update_user = 'UPDATE users SET first_name = %s, last_name = %s, fb_id = %s, photo = %s WHERE email = %s RETURNING user_id'
 show_all_users = 'SELECT first_name, last_name, fb_id, email, user_id from users ORDER BY user_id DESC'
 show_user_id = 'SELECT first_name, last_name, fb_id, email from users WHERE user_id = %d'
-show_user_email = 'SELECT first_name, last_name, fb_id, email from users WHERE email = %s'
+show_user_email = 'SELECT first_name, last_name, fb_id, email, user_id from users WHERE email = %s'
 
 check_login = 'SELECT password, user_id, email, fb_id, photo_url, first_name, last_name FROM users WHERE email = %s'
 
