@@ -19,12 +19,6 @@ app.register_blueprint(users_blueprint)
 app.register_blueprint(friends_blueprint)
 app.register_blueprint(ratings_blueprint)
 
-@app.route('/random', methods=['POST'])
-def users_search():
-	data = utils.get_field(request, 'data')
-	print(json.dumps(data))
-	return jsonify(success=True)
-
 
 @app.errorhandler(InvalidUsage)
 def handle_invalid_usage(error):
