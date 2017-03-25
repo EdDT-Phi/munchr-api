@@ -29,7 +29,8 @@ def handle_invalid_usage(error):
 def server_error(e):
     # Log the error and stacktrace.
     print('An error occurred during a request.')
-    return 'An internal error occurred.', 500
+    print(e)
+    return jsonify(error='An internal error occurred.'), 500
 
 
 if __name__ == "__main__":

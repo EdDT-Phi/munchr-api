@@ -1,25 +1,4 @@
-﻿Skip to content
-This repository
-Search
-Pull requests
-Issues
-Gist
- @EdDT-Phi
- Sign out
- Unwatch 1
-  Star 0
- Fork 0 EdDT-Phi/munchr-api Private
- Code  Issues 0  Pull requests 0  Projects 0  Wiki  Pulse  Graphs  Settings
-Tree: 571ca307bd Find file Copy pathmunchr-api/schema_postgres.sql
-571ca30  2 days ago
-@EdDT-Phi EdDT-Phi Blueprints
-1 contributor
-RawBlameHistory    
-63 lines (49 sloc)  2.14 KB
--- gcloud beta sql connect munchr-mysql --user=root
-
-
-DROP TABLE IF EXISTS users;
+﻿DROP TABLE IF EXISTS users;
 CREATE TABLE users (
 	user_id     serial UNIQUE NOT NULL,
 	fb_id       text,
@@ -55,10 +34,10 @@ CREATE TABLE friends (
 
 DROP TABLE IF EXISTS restaurants;
 CREATE TABLE restaurants (
-	restaurant_id   text UNIQUE NOT NULL, -- same as api id
+	res_id   text UNIQUE NOT NULL, -- same as api id
 	cuisine         text,
-	name 			text NOT NULL,
-	PRIMARY KEY 	(restaurant_id)
+	res_name 			text NOT NULL,
+	PRIMARY KEY 	(res_id)
 );
 
 -- CREATE INDEX ON restaurants (restaurant_id);
@@ -75,7 +54,7 @@ INSERT INTO friends (user_id1, user_id2) VALUES (3, 1);
 INSERT INTO friends (user_id1, user_id2) VALUES (1, 3);
 INSERT INTO friends (user_id1, user_id2) VALUES (2, 3);
 
-INSERT INTO restaurants (restaurant_id, name) VALUES ('ChIJ9XmrDLC1RIYRKZ6iF4_DV7I', 'The Hightower');
+INSERT INTO restaurants (res_id, res_name) VALUES ('ChIJ9XmrDLC1RIYRKZ6iF4_DV7I', 'The Hightower');
 
-INSERT INTO user_ratings (user_id, res_id, liked, specific) VALUES (3, 'ChIJ9XmrDLC1RIYRKZ6iF4_DV7I', true, 'food')
-INSERT INTO user_ratings (user_id, res_id, liked, specific) VALUES (1, 'ChIJ9XmrDLC1RIYRKZ6iF4_DV7I', false, 'food')
+INSERT INTO user_ratings (user_id, res_id, liked, specific) VALUES (3, 'ChIJ9XmrDLC1RIYRKZ6iF4_DV7I', true, 'food');
+INSERT INTO user_ratings (user_id, res_id, liked, specific) VALUES (1, 'ChIJ9XmrDLC1RIYRKZ6iF4_DV7I', false, 'food');
