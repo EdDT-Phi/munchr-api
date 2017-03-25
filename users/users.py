@@ -10,43 +10,53 @@ users_blueprint = Blueprint('users', __name__)
 
 
 @users_blueprint.route('/login/', methods=['GET', 'POST'])
-def login():
-    if request.method == 'GET':
-        return render_template('login.html')
+def users_login():
+	if request.method == 'GET':
+		return render_template('login.html')
 
-    email = utils.get_field(request, 'email', required=True)
-    password = utils.get_field(request, 'password', required=True)
-    return login(email, password)
+	email = utils.get_field(request, 'email', required=True)
+	password = utils.get_field(request, 'password', required=True)
+	return login(email, password)
 
 
 
 @users_blueprint.route('/users/search/', methods=['GET', 'POST'])
 def users_search():
-    if request.method == 'GET':
-        return render_template('search.html')
+	if request.method == 'GET':
+		return render_template('search.html')
 
-    query = utils.get_field(request, 'query', required=True)
-    user_id = utils.get_num(request, 'user_id', required=True)
-    return search_users(query, user_id)
+	query = utils.get_field(request, 'query', required=True)
+	user_id = utils.get_num(request, 'user_id', required=True)
+	return search_users(query, user_id)
 
 
 @users_blueprint.route('/users/', methods=['GET', 'POST'])
 @users_blueprint.route('/users/<int:user_id>')
 def users_route(user_id=None):
-    if request.method == 'POST':
-        first_name = utils.get_field(request, 'first_name', required=True)
-        last_name = utils.get_field(request, 'last_name', required=True)
-        email = utils.get_field(request, 'email', required=True)
-        password = utils.get_field(request, 'password')
-        fb_id = utils.get_field(request, 'fb_id')
-        photo = utils.get_field(request, 'photo')
+	if request.method == 'POST':
+		first_name = utils.get_field(request, 'first_name', required=True)
+		last_name = utils.get_field(request, 'last_name', required=True)
+		email = utils.get_field(request, 'email', required=True)
+		password = utils.get_field(request, 'password', required=True)
 
-        return new_user(first_name, last_name, email, password, fb_id, photo)
+		return new_user(first_name, last_name, email, password)
 
-    if user_id is None:
-        return get_all_users()
+	if user_id is None:
+		return get_all_users()
 
-    return get_user(user_id)
+	return get_user(user_id)
+
+
+@users_blueprint.route('/users/facebook', methods=['POST'])
+def users_facebook_login():
+	first_name = utils.get_field(request, 'first_name', required=True)
+	last_name = utils.get_field(request, 'last_name', required=True)
+	email = utils.get_field(request, 'email', required=True)
+	fb_id = utils.get_field(request, 'fb_id', required=True)
+	photo = utils.get_field(request, 'photo', required=True)
+
+	return login_facebook(first_name, last_name, email, fb_id, photo)
+
 
 
 def login(email, password):
@@ -71,21 +81,45 @@ def login(email, password):
 	return jsonify(result=result)
 
 
-def new_user(first_name, last_name, email, password, fb_id, photo):
-	print(first_name, last_name, email, password, fb_id, photo)
+def new_user(first_name, last_name, email, password):
+	print(first_name, last_name, email, password)
 
-
-	if password is None:
-		if fb_id is None: return jsonify(error='password or fb_id required')
-		if photo is None: return jsonify(error='photo required with fb_id')
-	else:
-		password = generate_password_hash(password, 12)
-
+	password = generate_password_hash(password, 12)
 	first_name = utils.to_name(first_name)
 	last_name = utils.to_name(last_name)
 	email = email.lower()
 
-	row = utils.update_query(queries.new_user % (first_name, last_name, fb_id, email, password.decode('UTF-8'), photo), fetch=True)
+	row = utils.update_query(queries.new_user % (first_name, last_name, email, password.decode('UTF-8')), fetch=True)
+
+	result = {
+		'user_id': row[0][0],
+		'email': email,
+		'first_name': first_name,
+		'last_name': last_name,
+	}
+
+	return jsonify(result=result)
+
+def login_facebook(first_name, last_name, email, fb_id, photo):
+	first_name = utils.to_name(first_name)
+	last_name = utils.to_name(last_name)
+	email = email.lower()
+
+	check_login = utils.select_query(queries.show_user_email, (email,))
+
+	if len(check_login) != 0:
+		check_login = check_login[0]
+		fb_f_name = check_login[0]
+		fb_l_name = check_login[1]
+		fb_fb_id = check_login[2]
+		fb_email = check_login[3]
+		if fb_fb_id != None and fb_fb_id != fb_id:
+			return jsonify(error='Another FB user is using that email')
+
+		if fb_f_name != first_name or fb_l_name != last_name:
+			row = utils.update_query(queries.update_user, (first_name, last_name, fb_id, photo, email,), fetch=true)
+	else:
+		row = utils.update_query(queries.new_fb_user % (first_name, last_name, fb_id, email, photo), fetch=True)
 
 	result = {
 		'user_id': row[0][0],
