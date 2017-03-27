@@ -54,6 +54,7 @@ def users_facebook_login():
 	email = utils.get_field(request, 'email', required=True)
 	fb_id = utils.get_field(request, 'fb_id', required=True)
 	photo = utils.get_field(request, 'photo', required=True)
+	friends = utils.get_list(request, 'friends', required=True)
 
 	return login_facebook(first_name, last_name, email, fb_id, photo)
 
@@ -100,7 +101,7 @@ def new_user(first_name, last_name, email, password):
 
 	return jsonify(result=result)
 
-def login_facebook(first_name, last_name, email, fb_id, photo):
+def login_facebook(first_name, last_name, email, fb_id, photo, friends):
 	first_name = utils.to_name(first_name)
 	last_name = utils.to_name(last_name)
 	email = email.lower()
@@ -123,6 +124,14 @@ def login_facebook(first_name, last_name, email, fb_id, photo):
 	else:
 		row = utils.update_query(queries.new_fb_user % (first_name, last_name, fb_id, email, photo), fetch=True)
 		user_id = row[0][0]
+
+
+	rows = utils.select_query(queries.fb_to_user_id, (tuple(friends), user_id))
+	friend_ids = [row[0] for row in rows]
+
+	if len(friend_ids) > 0:
+		utils.update_query(queries.facebook_friends, {'friends': friend_ids, 'user_id': user_id})
+
 	result = {
 		'user_id': user_id,
 		'email': email,
@@ -131,7 +140,6 @@ def login_facebook(first_name, last_name, email, fb_id, photo):
 		'first_name': first_name,
 		'last_name': last_name,
 	}
-
 	return jsonify(result=result)
 
 
