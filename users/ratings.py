@@ -21,7 +21,7 @@ def user_rating():
 def get_activity(user_id):
 	ratings = utils.select_query(queries.get_activity)
 	results = []
-	utils.add_rows_to_list(ratings, results, ('first_name', 'last_name', 'photo_url', 'liked', 'res_name', 'review_date', 'user_id'))
+	utils.add_rows_to_list(ratings, results, ('first_name', 'last_name', 'photo', 'liked', 'res_name', 'review_date', 'user_id'))
 
 	for i in range(len(results)):
 		ago = datetime.now() - results[i]['review_date']

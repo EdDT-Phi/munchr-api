@@ -56,7 +56,7 @@ def users_facebook_login():
 	photo = utils.get_field(request, 'photo', required=True)
 	friends = utils.get_list(request, 'friends', required=True)
 
-	return login_facebook(first_name, last_name, email, fb_id, photo)
+	return login_facebook(first_name, last_name, email, fb_id, photo, friends)
 
 
 
@@ -122,15 +122,17 @@ def login_facebook(first_name, last_name, email, fb_id, photo, friends):
 			row = utils.update_query(queries.update_user, (first_name, last_name, fb_id, photo, email,), fetch=True)
 			user_id = row[0][0]
 	else:
-		row = utils.update_query(queries.new_fb_user % (first_name, last_name, fb_id, email, photo), fetch=True)
+		row = utils.update_query(queries.new_fb_user, (first_name, last_name, fb_id, email, photo,), fetch=True)
 		user_id = row[0][0]
 
 
-	rows = utils.select_query(queries.fb_to_user_id, (tuple(friends), user_id))
+	rows = utils.select_query(queries.fb_to_user_id, (tuple(friends), user_id,))
 	friend_ids = [row[0] for row in rows]
 
+	cont = ','.join(['(%s, %d), (%d, %s)' % (friend, user_id, user_id, friend) for friend in friend_ids])
+
 	if len(friend_ids) > 0:
-		utils.update_query(queries.facebook_friends, {'friends': friend_ids, 'user_id': user_id})
+		utils.update_query(queries.facebook_friends + cont)
 
 	result = {
 		'user_id': user_id,
