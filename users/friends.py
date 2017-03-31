@@ -20,62 +20,13 @@ def friends(user_id=None):
 
 
 def get_friends(user_id):
-	resp = utils.select_query(queries.view_friends % user_id)
 	friends = []
-	utils.add_rows_to_list(resp, friends, ('user_id', 'first_name', 'last_name'))
+	rows = utils.select_query(queries.view_friends, (user_id,))
+	utils.add_rows_to_list(rows, friends, ('user_id', 'first_name', 'last_name', 'photo_url'))
 
-	print(friends)
-	print(','.join([str(friend['user_id']) for friend in friends]))
-	if len(friends) == 0:
-		ls = ''
-	else:
-		ls = 'AND NOT (user_id in (%s))' % (','.join([str(friend['user_id']) for friend in friends]))
-
-	resp = utils.select_query(queries.added_me % (user_id, ls))
-	non_friends = []
-	utils.add_rows_to_list(resp, non_friends, ('user_id', 'first_name', 'last_name'))
-
-	return Response(json.dumps({'friends': friends, 'non_friends': non_friends}), mimetype='application/json')
-
-
-def new_friend(user_id1, user_id2):
-
-	if user_id1 == user_id2:
-		return jsonify(error='cannot befriend self')
-
-	# if user_id1 is None or user_id2 is None:
-		# return jsonify(error='must provide valid user_ids')
-
-	# Verfiy users exist
-	resp = utils.select_query(queries.verify_users % (user_id1, user_id2))
-	if len(resp) != 2:
-		return jsonify(error='one or both user_ids do not exist')
-
-	# Verify users not friends
-	resp = utils.select_query(queries.check_not_already_friends % (user_id1, user_id2))
-	if len(resp) != 0:
-		return jsonify(error='users already friends')
-
-	# Add friend
-	utils.update_query(queries.add_friend, (user_id1, user_id2))
-
-	return jsonify(success=True)
-
-def get_friends(user_id):
-	resp = utils.select_query(queries.view_friends % user_id)
 	friends = []
-	utils.add_rows_to_list(resp, friends, ('user_id', 'first_name', 'last_name'))
-
-	print(friends)
-	print(','.join([str(friend['user_id']) for friend in friends]))
-	if len(friends) == 0:
-		ls = ''
-	else:
-		ls = 'AND NOT (user_id in (%s))' % (','.join([str(friend['user_id']) for friend in friends]))
-
-	resp = utils.select_query(queries.added_me % (user_id, ls))
-	non_friends = []
-	utils.add_rows_to_list(resp, non_friends, ('user_id', 'first_name', 'last_name'))
+	rows = utils.select_query(queries.view_friends, (user_id,))
+	utils.add_rows_to_list(rows, friends, ('user_id', 'first_name', 'last_name', 'photo_url'))
 
 	return Response(json.dumps({'friends': friends, 'non_friends': non_friends}), mimetype='application/json')
 

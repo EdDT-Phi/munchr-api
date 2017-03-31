@@ -98,8 +98,6 @@ def select_query(query, params=None):
 
 
 def update_query(query, params=None, fetch=False):
-	print(query, params)
-
 	db = get_db()
 	conn = db.getconn()
 	cursor = conn.cursor()
