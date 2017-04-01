@@ -4,8 +4,9 @@ check_not_already_friends = 'SELECT user_id1, user_id2 FROM friends WHERE user_i
 add_friend = 'INSERT INTO friends (user_id1, user_id2) VALUES (%d, %d)'
 
 view_friends = 'SELECT user_id, first_name, last_name, photo_url FROM friends JOIN users ON user_id = user_id2 WHERE user_id1 = %s'
-added_me = 'SELECT user_id, first_name, last_name FROM friends JOIN users ON user_id = user_id1 WHERE user_id2 = %d %s'
-
+view_friend_requests = 'SELECT user_id, first_name, last_name, photo_url FROM friend_requests JOIN users ON user_id = user_from_id WHERE user_to_id = %s'
+delete_request = 'DELETE FROM friend_requests WHERE user_from_id = %s AND user_to_id = %s'
+accept_request = 'INSERT INTO friends (user_id1, user_id2) VALUES (%(user_id1)s, %(user_id2)s), (%(user_id2)s, %(user_id1)s);'
 # Search queries
 # search_friends = 'SELECT user_id, first_name, last_name, email FROM friends JOIN users ON user_id2 = user_id ' \
 #                  'WHERE user_id1 = %d AND (first_name = %s OR last_name = %sOR email LIKE %s%% ' \
@@ -28,8 +29,7 @@ show_all_users = 'SELECT first_name, last_name, fb_id, email, user_id from users
 show_user_id = 'SELECT first_name, last_name, fb_id, email from users WHERE user_id = %d'
 show_user_email = 'SELECT first_name, last_name, fb_id, email, user_id from users WHERE email = %s'
 
-#
-
+# Login
 check_login = 'SELECT password, user_id, email, fb_id, photo_url, first_name, last_name FROM users WHERE email = %s'
 
 # Cuisine QA
@@ -39,5 +39,5 @@ update_cuisines = 'UPDATE restaurants SET cuisine = %s WHERE res_id = %s'
 
 # User Ratings
 store_new_rating = 'INSERT INTO user_ratings (user_id, res_id, liked, specific, review_date) VALUES (%s, %s, %s, %s, %s);'
-get_friends_activity = 'SELECT first_name, last_name, photo_url, liked, res_name, review_date, users.user_id FROM user_ratings JOIN users ON user_ratings.user_id = users.user_id JOIN restaurants ON user_ratings.res_id = restaurants.res_id;'
+get_friends_activity = 'SELECT first_name, last_name, photo_url, liked, res_name, review_date, users.user_id FROM user_ratings JOIN users ON user_ratings.user_id = users.user_id JOIN restaurants ON user_ratings.res_id = restaurants.res_id JOIN friends ON friends.user_id2 = users.user_id WHERE friends.user_id1 = %s;'
 get_activity = 'SELECT first_name, last_name, photo_url, liked, res_name, review_date FROM user_ratings JOIN users ON user_ratings.user_id = users.user_id JOIN restaurants ON user_ratings.res_id = restaurants.res_id WHERE user_ratings.user_id = %s;'
