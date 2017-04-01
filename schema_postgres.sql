@@ -11,14 +11,14 @@ CREATE TABLE users (
 );
 
 
--- DROP TABLE IF EXISTS user_ratings;
--- CREATE TABLE user_ratings (
--- 	user_id 	int NOT NULL,
--- 	res_id 		text NOT NULL,
--- 	liked		boolean NOT NULL,
--- 	specific	text,
--- 	review_date timestamp DEFAULT current_timestamp
--- );
+DROP TABLE IF EXISTS user_ratings;
+CREATE TABLE user_ratings (
+	user_id 	int NOT NULL,
+	res_id 		text NOT NULL,
+	liked		boolean NOT NULL,
+	specific	text,
+	review_date timestamp DEFAULT current_timestamp
+);
 
 
 -- DROP TABLE IF EXISTS user_swipes;
