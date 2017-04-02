@@ -57,35 +57,41 @@ def get_details_obj(res_id):
 	resp = requests.get(query)
 	data = resp.json()['result']
 
-	results = {
+	result = {
 		'reviews': [],
 		'photos': [],
 		'phone': data['formatted_phone_number'],
-		'opennow': data['opening_hours']['open_now'],
 		'website': data['website'],
 		'price': -1,
-		'name': data['name']
+		'name': data['name'],
+		'rating': data['rating'],
+		'location': {
+			'lat': data['geometry']['location']['lat'],
+			'lon': data['geometry']['location']['lng'],
+		}
 	}
 
+	if 'opening_hours' in data:
+		result['opennow'] = data['opening_hours']['open_now'],
 
 	if 'price_level' in data:
-		results['price'] = data['price_level']
+		result['price'] = data['price_level']
 
 	for review in data['reviews']:
-		results['reviews'].append({
+		result['reviews'].append({
 				'rating': review['rating'],
 				'review_text': review['text'],
 				'review_time_friendly': review['time']
 			})
 	for photo in data['photos']:
-		results['photos'].append(google_photos % (google_key, photo['photo_reference']))
+		result['photos'].append(google_photos % (google_key, photo['photo_reference']))
 
-	return results
+	return result
 
 
 def get_details(res_id):
-	results = get_details_obj(res_id)
-	return jsonify(results=results)
+	result = get_details_obj(res_id)
+	return jsonify(result=result)
 
 
 def get_restaurants(lat, lng, rad, price, cuisines):
@@ -124,7 +130,7 @@ def get_restaurants_by_cusine(query, lat, lng):
 		if 'photos' not in r: continue
 
 		results.append({
-			'id': r['place_id'],
+			'res_id': r['place_id'],
 			'photo': google_photos % (google_key, restaurant['photos'][0]['photo_reference']),
 			'name': r['name'],
 			'location': {

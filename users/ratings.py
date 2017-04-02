@@ -22,7 +22,7 @@ def user_rating():
 def get_friends_activity(user_id):
 	ratings = utils.select_query(queries.get_friends_activity, (user_id,))
 	results = []
-	utils.add_rows_to_list(ratings, results, ('first_name', 'last_name', 'photo_url', 'liked', 'res_name', 'review_date', 'user_id'))
+	utils.add_rows_to_list(ratings, results, ('first_name', 'last_name', 'photo_url', 'liked', 'res_name', 'res_id', 'review_date', 'user_id'))
 
 	for i in range(len(results)):
 		results[i]['review_date'] = time_to_text(datetime.now() - results[i]['review_date'])
