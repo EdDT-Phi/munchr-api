@@ -45,7 +45,7 @@ def get_activity(user_id, other_id):
 	if are_friends(user_id, other_id):
 		result['type'] = 'friend'
 		ratings = utils.select_query(queries.get_activity, (other_id,))
-		utils.add_rows_to_list(ratings, result['activity'], ('first_name', 'last_name', 'photo_url', 'liked', 'res_name', 'review_date'))
+		utils.add_rows_to_list(ratings, result['activity'], ('first_name', 'last_name', 'photo_url', 'liked', 'res_name', 'res_id', 'review_date'))
 
 		for i in range(len(result['activity'])):
 			result['activity'][i]['review_date'] = time_to_text(datetime.now() - result['activity'][i]['review_date'])

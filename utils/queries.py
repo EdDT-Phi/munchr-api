@@ -45,4 +45,4 @@ update_cuisines = 'UPDATE restaurants SET cuisine = %s WHERE res_id = %s'
 # User Ratings
 store_new_rating = 'INSERT INTO user_ratings (user_id, res_id, liked, specific, review_date) VALUES (%s, %s, %s, %s, %s);'
 get_friends_activity = 'SELECT first_name, last_name, photo_url, liked, res_name, user_ratings.res_id, review_date, user_ratings.user_id FROM user_ratings JOIN friends ON user_ratings.user_id = friends.user_id2 JOIN restaurants ON user_ratings.res_id = restaurants.res_id JOIN users on users.user_id = user_ratings.user_id WHERE friends.user_id1 = %s;'
-get_activity = 'SELECT first_name, last_name, photo_url, liked, res_name, review_date FROM user_ratings JOIN users ON user_ratings.user_id = users.user_id JOIN restaurants ON user_ratings.res_id = restaurants.res_id WHERE user_ratings.user_id = %s;'
+get_activity = 'SELECT first_name, last_name, photo_url, liked, res_name, user_ratings.res_id, review_date FROM user_ratings JOIN users ON user_ratings.user_id = users.user_id JOIN restaurants ON user_ratings.res_id = restaurants.res_id WHERE user_ratings.user_id = %s;'
