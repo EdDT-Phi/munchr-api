@@ -1,19 +1,24 @@
 # Friends queries
 verify_users = 'SELECT user_id FROM users WHERE user_id=%d OR user_id=%d'
-check_not_already_friends = 'SELECT user_id1, user_id2 FROM friends WHERE user_id1=%s AND user_id2=%s'
-add_friend = 'INSERT INTO friends (user_id1, user_id2) VALUES (%d, %d)'
+are_friends = 'SELECT user_id1, user_id2 FROM friends WHERE user_id1=%s AND user_id2=%s'
 
+add_friend = 'INSERT INTO friends (user_id1, user_id2) VALUES (%d, %d)'
+remove_friend = 'DELETE FROM friends WHERE (user_id1 = %(u1)s AND user_id2 = %(u2)s) OR (user_id1 = %(u2)s AND user_id2 = %(u1)s);'
 view_friends = 'SELECT user_id, first_name, last_name, photo_url FROM friends JOIN users ON user_id = user_id2 WHERE user_id1 = %s'
+
 view_friend_requests = 'SELECT user_id, first_name, last_name, photo_url FROM friend_requests JOIN users ON user_id = user_from_id WHERE user_to_id = %s'
 delete_request = 'DELETE FROM friend_requests WHERE user_from_id = %s AND user_to_id = %s'
+friend_request = 'INSERT INTO friend_requests (user_from_id, user_to_id) VALUES (%s, %s)';
 accept_request = 'INSERT INTO friends (user_id1, user_id2) VALUES (%(user_id1)s, %(user_id2)s), (%(user_id2)s, %(user_id1)s);'
+
+requested = 'SELECT user_from_id, user_to_id FROM friend_requests WHERE (user_from_id = %(u1)s AND user_to_id = %(u2)s) OR (user_from_id = %(u2)s AND user_to_id = %(u1)s)'
 # Search queries
 # search_friends = 'SELECT user_id, first_name, last_name, email FROM friends JOIN users ON user_id2 = user_id ' \
 #                  'WHERE user_id1 = %d AND (first_name = %s OR last_name = %sOR email LIKE %s%% ' \
 #                  'OR first_name LIKE %s%% OR last_name LIKE %s%%)'
-# search_all = 'SELECT user_id, first_name, last_name, email FROM users ' \
-#              'WHERE (first_name = %s OR last_name = %sOR email LIKE %s%% ' \
-#              'OR first_name LIKE %s%% OR last_name LIKE %s%%)'
+search_all = 'SELECT user_id, first_name, last_name, photo_url FROM users ' \
+             'WHERE (first_name = %s OR last_name = %s OR email LIKE %s ' \
+             'OR first_name LIKE %s OR last_name LIKE %s) LIMIT 10;'
 
 # User Queries
 new_user = 'INSERT INTO users (first_name, last_name, email, password) ' \

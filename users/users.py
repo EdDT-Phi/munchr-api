@@ -83,7 +83,6 @@ def login(email, password):
 
 
 def new_user(first_name, last_name, email, password):
-	print(first_name, last_name, email, password)
 
 	password = generate_password_hash(password, 12)
 	first_name = utils.to_name(first_name)
@@ -159,9 +158,13 @@ def search_users(query, user_id):
 
 	# search among all users
 	rows = utils.select_query(queries.search_all, (
-	utils.to_name(query), utils.to_name(query), query, utils.to_name(query), utils.to_name(query)))
-	utils.add_rows_to_list(rows, results, ('user_id', 'first_name', 'last_name', 'email'))
-	return Response(json.dumps(results), mimetype='application/json')
+		utils.to_name(query),
+		utils.to_name(query),
+		query + '%',
+		utils.to_name(query) + '%',
+		utils.to_name(query) + '%'))
+	utils.add_rows_to_list(rows, results, ('user_id', 'first_name', 'last_name', 'photo_url'))
+	return jsonify(results=results)
 
 
 def get_all_users():
