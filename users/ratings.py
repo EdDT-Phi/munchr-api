@@ -42,8 +42,13 @@ def get_activity(user_id, other_id):
 		'type': None
 	}
 
-	if are_friends(user_id, other_id):
+
+	if user_id == other_id:
+		result['type'] = 'self'
+	elif are_friends(user_id, other_id):
 		result['type'] = 'friend'
+
+	if result['type'] is not None:
 		ratings = utils.select_query(queries.get_activity, (other_id,))
 		utils.add_rows_to_list(ratings, result['activity'], ('first_name', 'last_name', 'photo_url', 'liked', 'res_name', 'res_id', 'review_date'))
 

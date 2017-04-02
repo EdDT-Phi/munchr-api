@@ -25,7 +25,7 @@ new_user = 'INSERT INTO users (first_name, last_name, email, password) ' \
            'VALUES (%s, %s, %s, %s) RETURNING user_id'
 new_fb_user = 'INSERT INTO users (first_name, last_name, fb_id, email, photo_url) ' \
            'VALUES (%s, %s, %s, %s, %s) RETURNING user_id'
-update_user = 'UPDATE users SET first_name = %s, last_name = %s, fb_id = %s, photo = %s WHERE email = %s RETURNING user_id'
+update_user = 'UPDATE users SET first_name = %s, last_name = %s, fb_id = %s, photo_url = %s WHERE email = %s RETURNING user_id'
 
 fb_to_user_id = 'SELECT user_id from users where fb_id IN %s AND user_id NOT IN (SELECT user_id2 from friends where user_id1 = %s);'
 facebook_friends = 'INSERT INTO friends (user_id1, user_id2) VALUES '

@@ -74,7 +74,7 @@ def login(email, password):
 		'user_id': db_pass[0][1],
 		'email': db_pass[0][2],
 		'fb_id': db_pass[0][3],
-		'photo': db_pass[0][4],
+		'photo_url': db_pass[0][4],
 		'first_name': db_pass[0][5],
 		'last_name': db_pass[0][6],
 	}
