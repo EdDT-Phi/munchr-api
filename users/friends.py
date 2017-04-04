@@ -21,10 +21,7 @@ def friends(user_id=None):
 		rows = utils.select_query(queries.view_friends, (user_id,))
 		utils.add_rows_to_list(rows, friends, ('user_id', 'first_name', 'last_name', 'photo_url'))
 
-		requests = []
-		rows = utils.select_query(queries.view_friend_requests, (user_id,))
-		utils.add_rows_to_list(rows, requests, ('user_id', 'first_name', 'last_name', 'photo_url'))
-
+		requests = get_friend_requests(user_id)
 		return jsonify(result={'friends': friends, 'requests': requests})
 
 	user_from_id = utils.get_num(request, 'user_from_id', required=True)
@@ -61,3 +58,9 @@ def requested(user_id1, user_id2):
 	if row[0] == user_id1:
 		return 'requester'
 	return 'requested'
+
+def get_friend_requests(user_id):
+	requests = []
+	rows = utils.select_query(queries.view_friend_requests, (user_id,))
+	utils.add_rows_to_list(rows, requests, ('user_id', 'first_name', 'last_name', 'photo_url'))
+	return requests
