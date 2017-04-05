@@ -137,7 +137,7 @@ def login_facebook(first_name, last_name, email, fb_id, photo, friends):
 		'user_id': user_id,
 		'email': email,
 		'fb_id': fb_id,
-		'photo': photo,
+		'photo_url': photo,
 		'first_name': first_name,
 		'last_name': last_name,
 	}
