@@ -3,7 +3,7 @@ from utils import queries, utils
 from restaurants.restaurants import get_details_obj
 from restaurants.filters import filters
 from datetime import datetime
-from users.friends import are_friends, requested
+from users.friends import are_friends, requested, get_friends_list
 
 ratings_blueprint = Blueprint('ratings', __name__)
 
@@ -14,7 +14,14 @@ def user_rating():
 	liked = utils.get_field(request, 'liked', required=True)
 	specific = utils.get_field(request, 'specific')
 
+	# save rating
 	utils.update_query(queries.store_new_rating, (user_id, res_id, liked, specific, datetime.now(),))
+
+	# recommend to friends
+	if liked:
+		friends = get_friends_list(user_id)
+		items = ','.join(['(%s, %s,\'%s\')' % (user_id, friend['user_id'], res_id) for friend in friends])
+		utils.update_query(queries.new_recommendation + items)
 
 	return jsonify(result={'success': True})
 
@@ -26,12 +33,6 @@ def get_friends_activity(user_id):
 
 	for i in range(len(results)):
 		results[i]['review_date'] = time_to_text(datetime.now() - results[i]['review_date'])
-
-		# if user_id == results[i]['user_id']:
-		# 	results[i]['first_name'] = 'You'
-		# 	results[i]['last_name'] = ''
-
-		# del results[i]['user_id']
 
 	return jsonify(results=results)
 

@@ -17,9 +17,7 @@ def delete_friend():
 @friends_blueprint.route('/friends/<int:user_id>')
 def friends(user_id=None):
 	if user_id is not None:
-		friends = []
-		rows = utils.select_query(queries.view_friends, (user_id,))
-		utils.add_rows_to_list(rows, friends, ('user_id', 'first_name', 'last_name', 'photo_url'))
+		friends = get_friends_list(user_id)
 
 		requests = get_friend_requests(user_id)
 		return jsonify(result={'friends': friends, 'requests': requests})
@@ -64,3 +62,9 @@ def get_friend_requests(user_id):
 	rows = utils.select_query(queries.view_friend_requests, (user_id,))
 	utils.add_rows_to_list(rows, requests, ('user_id', 'first_name', 'last_name', 'photo_url'))
 	return requests
+
+def get_friends_list(user_id):
+	friends = []
+	rows = utils.select_query(queries.view_friends, (user_id,))
+	utils.add_rows_to_list(rows, friends, ('user_id', 'first_name', 'last_name', 'photo_url'))
+	return friends
