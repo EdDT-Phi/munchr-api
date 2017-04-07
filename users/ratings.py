@@ -2,7 +2,6 @@ from flask import Blueprint, render_template, request, jsonify
 from utils import queries, utils
 from restaurants.restaurants import get_details_obj
 from restaurants.filters import filters
-from datetime import datetime
 from users.friends import are_friends, requested, get_friends_list
 
 ratings_blueprint = Blueprint('ratings', __name__)
@@ -32,7 +31,7 @@ def get_friends_activity(user_id):
 	utils.add_rows_to_list(ratings, results, ('first_name', 'last_name', 'photo_url', 'liked', 'res_name', 'res_id', 'review_date', 'user_id'))
 
 	for i in range(len(results)):
-		results[i]['review_date'] = time_to_text(datetime.now() - results[i]['review_date'])
+		results[i]['review_date'] = utils.time_to_text(results[i]['review_date'])
 
 	return jsonify(results=results)
 
@@ -54,25 +53,9 @@ def get_activity(user_id, other_id):
 		utils.add_rows_to_list(ratings, result['activity'], ('first_name', 'last_name', 'photo_url', 'liked', 'res_name', 'res_id', 'review_date'))
 
 		for i in range(len(result['activity'])):
-			result['activity'][i]['review_date'] = time_to_text(datetime.now() - result['activity'][i]['review_date'])
+			result['activity'][i]['review_date'] = utils.time_to_text(result['activity'][i]['review_date'])
 
 	else:
 		result['type'] = str(requested(user_id, other_id))
 
 	return jsonify(result=result)
-
-def time_to_text(ago):
-	if ago.days > 1:
-		return '%d days ago' % ago.days
-	elif ago.days == 1:
-		return 'Yesterday'
-	elif ago.seconds >= 60*60:
-		hrs = ago.seconds // (60*60)
-		sing = 'hour'
-		if hrs > 1:
-			sing += 's'
-		return '%d %s ago' % (hrs, sing)
-	elif ago.seconds > 60:
-		return 'A few minutes ago'
-	else:
-		return 'A few seconds ago'	

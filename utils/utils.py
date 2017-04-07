@@ -1,6 +1,7 @@
 from utils.err import InvalidUsage
 from utils.db_helper import get_db
 from math import radians, cos, sin, asin, sqrt
+from datetime import datetime
 
 
 def haversine(lon1, lat1, lon2, lat2):
@@ -131,3 +132,21 @@ def to_name(name):
 def full_name(query):
 	query = [to_name(name) for name in query.split(' ')]
 	return ' '.join(query)
+
+
+def time_to_text(time):
+	ago = datetime.now() - time
+	if ago.days > 1:
+		return '%d days ago' % ago.days
+	elif ago.days == 1:
+		return 'Yesterday'
+	elif ago.seconds >= 60*60:
+		hrs = ago.seconds // (60*60)
+		sing = 'hour'
+		if hrs > 1:
+			sing += 's'
+		return '%d %s ago' % (hrs, sing)
+	elif ago.seconds > 60:
+		return 'A few minutes ago'
+	else:
+		return 'A few seconds ago'

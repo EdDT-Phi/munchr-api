@@ -1,6 +1,7 @@
 import requests
 import os
 from flask import jsonify, Blueprint, render_template, request
+import datetime
 
 from utils import queries, utils
 from restaurants.filters import filters
@@ -13,8 +14,8 @@ google_search = google_base + 'nearbysearch/json?type=restaurant&language=en&ran
 google_photos = 'https://maps.googleapis.com/maps/api/place/photo?key=%s&photoreference=%s&maxheight=800&maxwidth=800'
 google_key = os.environ.get('GOOGLE_KEY')
 
-bing_images = 'https://api.cognitive.microsoft.com/bing/v5.0/images/search?q=%s&count=5'
-bing_key = os.environ.get('BING_KEY')
+# bing_images = 'https://api.cognitive.microsoft.com/bing/v5.0/images/search?q=%s&count=5'
+# bing_key = os.environ.get('BING_KEY')
 
 
 restaurants_blueprint = Blueprint('restaurants', __name__)
@@ -22,32 +23,29 @@ restaurants_blueprint = Blueprint('restaurants', __name__)
 
 @restaurants_blueprint.route('/restaurants/filters')
 def get_filters():
-    return get_filters()
+	return jsonify(results=filters)
 
 
-@restaurants_blueprint.route('/restaurants/details/<string:place_id>')
-def get_details(place_id):
-    return get_details(place_id)
+@restaurants_blueprint.route('/restaurants/details/<string:res_id>')
+def get_details(res_id):
+	result = get_details_obj(res_id)
+	return jsonify(result=result)
 
 
 @restaurants_blueprint.route('/restaurants/', methods=['GET', 'POST'])
 def get_restaurants():
-    if request.method == 'GET':
-        # return render_template('html', data=get_filters(30.3, -97.7))
-        return render_template('html')
+	if request.method == 'GET':
+		# return render_template('html', data=get_filters(30.3, -97.7))
+		return render_template('html')
 
-    lat = utils.get_float(request, 'lat', required=True)
-    lng = utils.get_float(request, 'long', required=True)
-    rad = utils.get_num(request, 'radius', 1, 20, required=True)
-    cuisines = utils.get_list(request, 'cuisines')
-    price = utils.get_num(request, 'price', required=True)
-    user_id = utils.get_num(request, 'user_id', required=True)
+	lat = utils.get_float(request, 'lat', required=True)
+	lng = utils.get_float(request, 'long', required=True)
+	rad = utils.get_num(request, 'radius', 1, 20, required=True)
+	cuisines = utils.get_list(request, 'cuisines')
+	price = utils.get_num(request, 'price', required=True)
+	user_id = utils.get_num(request, 'user_id', required=True)
 
-    return get_restaurants(lat, lng, rad, price, cuisines)
-
-
-def get_filters():
-	return jsonify(results=filters)
+	return get_restaurants(lat, lng, rad, price, cuisines)
 
 
 def get_details_obj(res_id):
@@ -81,17 +79,15 @@ def get_details_obj(res_id):
 		result['reviews'].append({
 				'rating': review['rating'],
 				'review_text': review['text'],
-				'review_time_friendly': review['time']
+				'review_time_friendly': format_time(review['time'])
 			})
 	for photo in data['photos']:
 		result['photos'].append(google_photos % (google_key, photo['photo_reference']))
 
 	return result
 
-
-def get_details(res_id):
-	result = get_details_obj(res_id)
-	return jsonify(result=result)
+def format_time(time):
+	return utils.time_to_text(datetime.datetime.fromtimestamp(time))
 
 
 def get_restaurants(lat, lng, rad, price, cuisines):
@@ -143,26 +139,3 @@ def get_restaurants_by_cusine(query, lat, lng):
 			'distance': utils.haversine(float(lat), float(lng), r['geometry']['location']['lat'], r['geometry']['location']['lng'])
 		})
 	return results
-
-
-def swipe_restaurant():
-	# liked = utils.get_boolean(request, 'liked', required=True)
-	# restaurant_id = utils.get_num(request, 'restaurant_id', required=True)
-	# user_id = utils.get_num(request, 'user_id', required=True)
-
-	# resp = utils.modify_query(swipe_restaurant % ())
-	return jsonify(success=True)
-
-
-def rate_restaurant():
-	# restaurant_id = utils.get_num(request, 'restaurant_id', required=True)
-	# user_id = utils.get_num(request, 'user_id', required=True)
-	# overall_rating = utils.get_num(request, 'overall_rating', 1, 5, required=True)
-	# food_rating = utils.get_num(request, 'food_rating', 1, 5)
-	# value_rating = utils.get_num(request, 'value_rating', 1, 5)
-	# service_rating = utils.get_num(request, 'service_rating', 1, 5)
-	# location_rating = utils.get_num(request, 'location_rating', 1, 5)
-	# atmosphere_rating = utils.get_num(request, 'atmosphere_rating', 1, 5)
-
-	# resp = utils.modify_query(rate_restaurant % ())
-	return jsonify(success=True)
