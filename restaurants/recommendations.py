@@ -17,4 +17,10 @@ def notifications(user_id):
 	utils.add_rows_to_list(rows, recommendations, ('first_name', 'last_name', 'photo_url', 'user_id', 'res_id', 'res_name'))
 
 	return jsonify(results={'requests': requests, 'recommendations': recommendations})
-    
+
+
+@recommendations_blueprint.route('/notifications/dismiss/<int:user_from_id>/<int:user_to_id>/<string:res_id>')
+def delete_recommendation(user_from_id, user_to_id, res_id):
+	utils.update_query(queries.delete_recommendation, (user_from_id, user_to_id, res_id));
+	return jsonify(success=True)
+

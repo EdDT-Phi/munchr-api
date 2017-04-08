@@ -50,3 +50,4 @@ get_activity = 'SELECT first_name, last_name, photo_url, liked, res_name, user_r
 # Recommendations
 new_recommendation = 'INSERT INTO recommendations (user_from_id, user_to_id, res_id) VALUES '
 get_recommendations = 'SELECT first_name, last_name, photo_url, user_from_id, restaurants.res_id, res_name FROM recommendations  JOIN users on user_from_id = users.user_id JOIN restaurants on recommendations.res_id = restaurants.res_id WHERE user_to_id = %s'
+delete_recommendation = 'DELETE FROM recommendations WHERE user_from_id = %s AND user_to_id = %s AND res_id = %s'
