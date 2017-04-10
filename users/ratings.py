@@ -14,7 +14,7 @@ def user_rating():
 	specific = utils.get_field(request, 'specific')
 
 	# save rating
-	utils.update_query(queries.store_new_rating, (user_id, res_id, liked, specifics))
+	utils.update_query(queries.store_new_rating, (user_id, res_id, liked, specific))
 
 	# recommend to friends
 	if liked:
