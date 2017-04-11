@@ -2,6 +2,7 @@ import requests
 import os
 from flask import jsonify, Blueprint, render_template, request
 import datetime
+import random
 
 from utils import queries, utils
 from restaurants.filters import filters
@@ -126,6 +127,15 @@ def get_restaurants_by_cusine(query, lat, lng):
 		r = restaurant
 		if 'photos' not in r: continue
 
+		e = random.randint(0, 2)
+		mock_restaurants = ['The HighTower', 'Cool Beans']
+		if e == 0:
+			evidence = 'Because you liked %s' % mock_restaurants[random.randint(0, len(mock_restaurants)-1)]
+		elif e == 1:
+			evidence = 'Because %d of your friends liked this' % random.randint(2, 10)
+		elif e == 2:
+			evidence = 'Because users with similar taste liked this'
+
 		results.append({
 			'res_id': r['place_id'],
 			'photo': google_photos % (google_key, restaurant['photos'][0]['photo_reference']),
@@ -137,6 +147,7 @@ def get_restaurants_by_cusine(query, lat, lng):
 			},
 			'price_level': -1 if 'price_level' not in r else r['price_level'],
 			'rating': -1 if 'rating' not in r else r['rating'],
-			'distance': utils.haversine(float(lat), float(lng), r['geometry']['location']['lat'], r['geometry']['location']['lng'])
+			'distance': utils.haversine(float(lat), float(lng), r['geometry']['location']['lat'], r['geometry']['location']['lng']),
+			'evidence': evidence
 		})
 	return results
