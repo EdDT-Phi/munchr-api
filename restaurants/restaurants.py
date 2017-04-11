@@ -64,6 +64,7 @@ def get_details_obj(res_id):
 		'name': data['name'],
 		'rating': data['rating'],
 		'location': {
+			'address': data['vicinity'],
 			'lat': data['geometry']['location']['lat'],
 			'lon': data['geometry']['location']['lng'],
 		}
