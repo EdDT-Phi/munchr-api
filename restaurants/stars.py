@@ -29,3 +29,8 @@ def delete_star(user_id, res_id):
 def is_starred(user_id, res_id):
 	check = utils.select_query(queries.check_single_star, (user_id, res_id))
 	return len(check) > 0
+
+def get_all_starred(user_id):
+	rows = utils.select_query(queries.get_stars, (user_id,))
+	return [row[0] for row in rows]
+

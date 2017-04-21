@@ -6,7 +6,7 @@ import random
 
 from utils import queries, utils
 from restaurants.filters import filters
-from restaurants.stars import is_starred
+from restaurants.stars import is_starred, get_all_starred
 
 google_base = 'https://maps.googleapis.com/maps/api/place/'
 # minprice and maxprice and opennow
@@ -47,7 +47,7 @@ def get_restaurants():
 	price = utils.get_num(request, 'price', required=True)
 	user_id = utils.get_num(request, 'user_id', required=True)
 
-	return get_restaurants(lat, lng, rad, price, cuisines)
+	return get_restaurants(lat, lng, rad, price, cuisines, user_id)
 
 
 def get_details_obj(user_id, res_id):
@@ -58,6 +58,7 @@ def get_details_obj(user_id, res_id):
 	data = resp.json()['result']
 
 	result = {
+		'res_id': data['place_id'],
 		'reviews': [],
 		'photos': [],
 		'phone': data['formatted_phone_number'],
@@ -94,7 +95,7 @@ def format_time(time):
 	return utils.time_to_text(datetime.datetime.fromtimestamp(time))
 
 
-def get_restaurants(lat, lng, rad, price, cuisines):
+def get_restaurants(lat, lng, rad, price, cuisines, user_id):
 	if cuisines is None: cuisines = []
 
 	lists = []
@@ -107,10 +108,15 @@ def get_restaurants(lat, lng, rad, price, cuisines):
 		lists.append(get_restaurants_by_cusine(query, lat, lng))
 
 	results = []
+	starred = get_all_starred(user_id)
 	for i in range(max([len(lst) for lst in lists])):
 		for lst in lists:
 			if i < len(lst):
+				res = lst[i]
+				res['starred'] = (res['res_id'] in starred)
 				results.append(lst[i])
+
+
 
 	return jsonify(results=results)
 
