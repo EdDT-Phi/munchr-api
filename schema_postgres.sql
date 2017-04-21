@@ -43,12 +43,20 @@
 -- 	PRIMARY KEY 	(res_id),
 -- );
 
-DROP TABLE IF EXISTS recommendations;
-CREATE TABLE recommendations (
-	user_from_id	int,
-	user_to_id		int,
-	res_id			text
-);
+-- DROP TABLE IF EXISTS recommendations;
+-- CREATE TABLE recommendations (
+-- 	user_from_id	int,
+-- 	user_to_id		int,
+-- 	res_id			text
+-- );
+
+
+-- DROP TABLE IF EXISTS stars;
+-- CREATE TABLE stars (
+-- 	user_id		int,
+-- 	res_id		text
+-- );
+
 
 
 -- INSERT INTO users (first_name, last_name, fb_id, email, photo_url) VALUES ('Eddie', 'Tribaldos', '1473474075997450', 'et_2012@live.com', 'https://graph.facebook.com/1473474075997450/picture?type=large');

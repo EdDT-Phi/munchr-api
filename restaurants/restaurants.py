@@ -6,6 +6,7 @@ import random
 
 from utils import queries, utils
 from restaurants.filters import filters
+from restaurants.stars import is_starred
 
 google_base = 'https://maps.googleapis.com/maps/api/place/'
 # minprice and maxprice and opennow
@@ -27,9 +28,9 @@ def get_filters():
 	return jsonify(results=filters)
 
 
-@restaurants_blueprint.route('/restaurants/details/<string:res_id>')
-def get_details(res_id):
-	result = get_details_obj(res_id)
+@restaurants_blueprint.route('/restaurants/details/<int:user_id>/<string:res_id>')
+def get_details(user_id, res_id):
+	result = get_details_obj(user_id, res_id)
 	return jsonify(result=result)
 
 
@@ -49,7 +50,7 @@ def get_restaurants():
 	return get_restaurants(lat, lng, rad, price, cuisines)
 
 
-def get_details_obj(res_id):
+def get_details_obj(user_id, res_id):
 	query = google_details % (res_id, google_key)
 	print(query)
 
@@ -86,6 +87,7 @@ def get_details_obj(res_id):
 	for photo in data['photos']:
 		result['photos'].append(google_photos % (google_key, photo['photo_reference']))
 
+	result['starred'] = is_starred(user_id, res_id)
 	return result
 
 def format_time(time):

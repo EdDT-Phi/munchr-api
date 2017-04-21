@@ -6,6 +6,7 @@ from users.ratings import ratings_blueprint
 from restaurants.restaurants import restaurants_blueprint
 from restaurants.restaurants_qa import restaurants_qa_blueprint
 from restaurants.recommendations import recommendations_blueprint
+from restaurants.stars import stars_blueprint
 import os
 import json
 from utils.err import InvalidUsage
@@ -20,6 +21,7 @@ app.register_blueprint(users_blueprint)
 app.register_blueprint(friends_blueprint)
 app.register_blueprint(ratings_blueprint)
 app.register_blueprint(recommendations_blueprint)
+app.register_blueprint(stars_blueprint)
 
 
 @app.errorhandler(InvalidUsage)
