@@ -94,5 +94,6 @@ filters = [
 "Turkish",
 "Vegetarian",
 "Venezuelan",
-"Vietnamese"
+"Vietnamese",
+"Wings",
 ]
