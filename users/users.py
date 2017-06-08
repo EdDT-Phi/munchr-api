@@ -89,7 +89,7 @@ def new_user(first_name, last_name, email, password):
 	last_name = utils.to_name(last_name)
 	email = email.lower()
 
-	row = utils.update_query(queries.new_user % (first_name, last_name, email, password.decode('UTF-8')), fetch=True)
+	row = utils.update_query(queries.new_user, (first_name, last_name, email, password.decode('UTF-8')), fetch=True)
 
 	result = {
 		'user_id': row[0][0],

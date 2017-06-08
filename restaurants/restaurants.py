@@ -28,9 +28,15 @@ def get_filters():
 	return jsonify(results=filters)
 
 
-@restaurants_blueprint.route('/restaurants/details/<int:user_id>/<string:res_id>')
-def get_details(user_id, res_id):
-	result = get_details_obj(user_id, res_id)
+@restaurants_blueprint.route('/restaurants/details/', methods=['POST'])
+def get_details():
+
+	lat = utils.get_float(request, 'lat', required=True)
+	lng = utils.get_float(request, 'lng', required=True)
+	user_id = utils.get_num(request, 'user_id', required=True)
+	res_id = utils.get_field(request, 'res_id', required=True)
+
+	result = get_details_obj(user_id, res_id, lat, lng)
 	return jsonify(result=result)
 
 
@@ -50,7 +56,7 @@ def get_restaurants():
 	return get_restaurants(lat, lng, rad, price, cuisines, user_id)
 
 
-def get_details_obj(user_id, res_id):
+def get_details_obj(user_id, res_id, lat, lng):
 	query = google_details % (res_id, google_key)
 	print(query)
 
@@ -69,7 +75,8 @@ def get_details_obj(user_id, res_id):
 		'location': {
 			'address': data['vicinity'],
 			'lat': data['geometry']['location']['lat'],
-			'lon': data['geometry']['location']['lng'],
+			'lng': data['geometry']['location']['lng'],
+			'distance': utils.haversine(lat, lng, data['geometry']['location']['lat'],data['geometry']['location']['lng'])
 		}
 	}
 
@@ -80,11 +87,12 @@ def get_details_obj(user_id, res_id):
 		result['price'] = data['price_level']
 
 	for review in data['reviews']:
-		result['reviews'].append({
-				'rating': review['rating'],
-				'review_text': review['text'],
-				'review_time_friendly': format_time(review['time'])
-			})
+		if review['rating'] > 3:
+			result['reviews'].append({
+					'rating': review['rating'],
+					'review_text': review['text'],
+					'review_time_friendly': format_time(review['time'])
+				})
 	for photo in data['photos']:
 		result['photos'].append(google_photos % (google_key, photo['photo_reference']))
 
