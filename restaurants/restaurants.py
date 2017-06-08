@@ -11,9 +11,9 @@ from restaurants.stars import is_starred, get_all_starred
 google_base = 'https://maps.googleapis.com/maps/api/place/'
 # minprice and maxprice and opennow
 google_details = google_base + 'details/json?placeid=%s&key=%s'
-google_search = google_base + 'nearbysearch/json?type=restaurant&language=en&rankby=prominence&'\
-	'key=%s&location=%f,%f&radius=%d&keyword=%s'
-google_photos = 'https://maps.googleapis.com/maps/api/place/photo?key=%s&photoreference=%s&maxheight=800&maxwidth=800'
+google_search = google_base + 'nearbysearch/json?type=restaurant&key=%s&location=%f,%f&radius=%d&keyword=%s'
+google_photos = google_base + 'photo?key=%s&photoreference=%s&maxheight=800&maxwidth=800'
+google_text_search = google_base + 'textsearch/json?type=restaurant&radius=50000&key=%s&query=%s&location=%f,%f'
 google_key = os.environ.get('GOOGLE_KEY')
 
 # bing_images = 'https://api.cognitive.microsoft.com/bing/v5.0/images/search?q=%s&count=5'
@@ -23,10 +23,32 @@ google_key = os.environ.get('GOOGLE_KEY')
 restaurants_blueprint = Blueprint('restaurants', __name__)
 
 
-@restaurants_blueprint.route('/restaurants/filters')
+@restaurants_blueprint.route('/restaurants/filters/')
 def get_filters():
 	return jsonify(results=filters)
 
+@restaurants_blueprint.route('/restaurants/search/', methods=['POST'])
+def search_restaurants():
+
+	lat = utils.get_float(request, 'lat', required=True)
+	lng = utils.get_float(request, 'lng', required=True)
+	query = utils.get_field(request, 'query', required=True)
+
+	query = google_text_search % (google_key, query, lat, lng)
+	print(query)
+
+	resp = requests.get(query)
+	data = resp.json()['results']
+
+	results = []
+	for res in data:
+		results.append({
+			'res_id': res['place_id'],
+			'name': res['name'],
+			'photo_url': google_photos % (google_key, res['photos'][0]['photo_reference']),
+			'address': res['formatted_address']
+			})
+	return jsonify(results=results)
 
 @restaurants_blueprint.route('/restaurants/details/', methods=['POST'])
 def get_details():
