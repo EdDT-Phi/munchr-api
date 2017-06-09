@@ -151,6 +151,7 @@ def get_restaurants(lat, lng, rad, price, cuisines, user_id):
 	return jsonify(results=results)
 
 
+
 def get_restaurants_by_cusine(query, lat, lng):
 	print(query)
 
@@ -158,7 +159,11 @@ def get_restaurants_by_cusine(query, lat, lng):
 	data = resp.json()
 
 	for res in data['results']:
-		utils.update_query(queries.store_seen_ids, {'id': res['place_id'], 'name': res['name']})
+		utils.update_query(queries.store_seen_ids, {
+			'id': res['place_id'], 
+			'name': res['name'], 
+			'photo_url': google_photos % (google_key, res['photos'][0]['photo_reference']),
+		})
 
 	results = []
 	for restaurant in data['results'][0:5]:

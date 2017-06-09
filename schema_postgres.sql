@@ -1,4 +1,4 @@
-﻿-- DROP TABLE IF EXISTS users;
+-- DROP TABLE IF EXISTS users;
 -- CREATE TABLE users (
 -- 	user_id     serial UNIQUE NOT NULL,
 -- 	fb_id       text,
@@ -11,13 +11,15 @@
 -- );
 
 
--- DROP TABLE IF EXISTS user_ratings;
--- CREATE TABLE user_ratings (
+-- DROP TABLE IF EXISTS user_history;
+-- CREATE TABLE user_history (
+-- 	rating_id	serial UNIQUE NOT NULL,
 -- 	user_id 	int NOT NULL,
 -- 	res_id 		text NOT NULL,
--- 	liked		boolean NOT NULL,
+-- 	liked		boolean,
 -- 	specific	text,
--- 	review_date timestamp DEFAULT current_timestamp
+-- 	review_date timestamp DEFAULT current_timestamp,
+-- 	PRIMARY KEY (rating_id)
 -- );
 
 
@@ -40,6 +42,7 @@
 -- 	res_id   	text UNIQUE NOT NULL, -- same as api id
 -- 	cuisine     text,
 -- 	res_name 	text NOT NULL,
+-- 	photo_url 	text NOT NULL,
 -- 	PRIMARY KEY 	(res_id),
 -- );
 

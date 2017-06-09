@@ -8,13 +8,13 @@ ratings_blueprint = Blueprint('ratings', __name__)
 
 @ratings_blueprint.route('/users/rating/', methods=['POST'])
 def user_rating():
-	user_id = utils.get_field(request, 'user_id', required=True)
-	res_id = utils.get_field(request, 'res_id', required=True)
+	rating_id = utils.get_num(request, 'rating_id', required=True)
+	user_id = utils.get_num(request, 'user_id', required=True)
 	liked = utils.get_field(request, 'liked', required=True)
 	specific = utils.get_field(request, 'specific')
 
 	# save rating
-	utils.update_query(queries.store_new_rating, (user_id, res_id, liked, specific))
+	utils.update_query(queries.rate_munch, (liked, specific, rating_id))
 
 	# recommend to friends
 	if liked:
@@ -23,6 +23,18 @@ def user_rating():
 		utils.update_query(queries.new_recommendation + items)
 
 	return jsonify(result={'success': True})
+
+
+@ratings_blueprint.route('/users/munch/', methods=['POST'])
+def user_munch():
+	user_id = utils.get_field(request, 'user_id', required=True)
+	res_id = utils.get_field(request, 'res_id', required=True)
+
+	# save rating
+	utils.update_query(queries.store_new_munch, (user_id, res_id))
+
+	return jsonify(result={'success': True})
+
 
 @ratings_blueprint.route('/users/activity/friends/<int:user_id>')
 def get_friends_activity(user_id):
@@ -50,7 +62,7 @@ def get_activity(user_id, other_id):
 
 	if result['type'] is not None:
 		ratings = utils.select_query(queries.get_activity, (other_id,))
-		utils.add_rows_to_list(ratings, result['activity'], ('first_name', 'last_name', 'photo_url', 'liked', 'res_name', 'res_id', 'review_date'))
+		utils.add_rows_to_list(ratings, result['activity'], ('rating_id', 'first_name', 'last_name', 'photo_url', 'liked', 'res_name', 'res_id', 'review_date'))
 
 		for i in range(len(result['activity'])):
 			result['activity'][i]['review_date'] = utils.time_to_text(result['activity'][i]['review_date'])
