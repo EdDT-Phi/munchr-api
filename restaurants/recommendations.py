@@ -1,6 +1,7 @@
 import os
 from flask import jsonify, Blueprint, render_template, request
 
+from users.ratings import get_unrated
 from users.friends import get_friend_requests
 from utils import queries, utils
 
@@ -16,7 +17,9 @@ def notifications(user_id):
 	rows = utils.select_query(queries.get_recommendations, (user_id,));
 	utils.add_rows_to_list(rows, recommendations, ('first_name', 'last_name', 'photo_url', 'user_id', 'res_id', 'res_name'))
 
-	return jsonify(results={'requests': requests, 'recommendations': recommendations})
+	ratings = get_unrated(user_id)
+
+	return jsonify(results={'requests': requests, 'recommendations': recommendations, 'ratings': ratings})
 
 
 @recommendations_blueprint.route('/notifications/dismiss/<int:user_from_id>/<int:user_to_id>/<string:res_id>')

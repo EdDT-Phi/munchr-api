@@ -43,7 +43,8 @@ null_cuisines = 'SELECT res_id FROM restaurants WHERE cuisine IS NULL LIMIT 1'
 update_cuisines = 'UPDATE restaurants SET cuisine = %s WHERE res_id = %s'
 
 # User Ratings
-rate_munch = 'UPDATE user_history SET liked = %s, specific =%s WHERE rating_id = %s;'
+rate_munch = 'UPDATE user_history SET liked = %s, specific = %s WHERE rating_id = %s;'
+get_unrated = 'SELECT rating_id, r.res_id, photo_url, res_name, review_date FROM user_history h JOIN restaurants r on h.res_id = r.res_id  WHERE h.user_id = %s AND liked IS NULL;'
 store_new_munch = 'INSERT INTO user_history (user_id, res_id) VALUES (%s, %s);'
 get_friends_activity = 'SELECT first_name, last_name, users.photo_url, liked, res_name, user_history.res_id, review_date, user_history.user_id FROM user_history JOIN friends ON user_history.user_id = friends.user_id2 JOIN restaurants ON user_history.res_id = restaurants.res_id JOIN users on users.user_id = user_history.user_id WHERE friends.user_id1 = %s ORDER BY review_date DESC LIMIT 10;'
 get_activity = 'SELECT rating_id, first_name, last_name, restaurants.photo_url, liked, res_name, user_history.res_id, review_date FROM user_history JOIN users ON user_history.user_id = users.user_id JOIN restaurants ON user_history.res_id = restaurants.res_id WHERE user_history.user_id = %s ORDER BY review_date DESC;'

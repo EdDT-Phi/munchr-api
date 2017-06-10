@@ -62,15 +62,12 @@ def get_details():
 	return jsonify(result=result)
 
 
-@restaurants_blueprint.route('/restaurants/', methods=['GET', 'POST'])
+@restaurants_blueprint.route('/restaurants/', methods=['POST'])
 def get_restaurants():
-	if request.method == 'GET':
-		# return render_template('html', data=get_filters(30.3, -97.7))
-		return render_template('html')
 
 	lat = utils.get_float(request, 'lat', required=True)
 	lng = utils.get_float(request, 'long', required=True)
-	rad = utils.get_num(request, 'radius', 1, 20, required=True)
+	rad = utils.get_num(request, 'radius', 1, 50, required=True)
 	cuisines = utils.get_list(request, 'cuisines')
 	price = utils.get_num(request, 'price', required=True)
 	user_id = utils.get_num(request, 'user_id', required=True)

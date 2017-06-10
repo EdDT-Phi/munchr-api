@@ -79,7 +79,7 @@ def get_boolean(request, field, required=False):
 	if ret == 'false':
 		return False
 
-	return InvalidUsage('%s must be true or false' % field)
+	raise InvalidUsage('%s must be true or false' % field)
 
 
 def select_query(query, params=None):

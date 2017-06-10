@@ -10,14 +10,16 @@ ratings_blueprint = Blueprint('ratings', __name__)
 def user_rating():
 	rating_id = utils.get_num(request, 'rating_id', required=True)
 	user_id = utils.get_num(request, 'user_id', required=True)
-	liked = utils.get_field(request, 'liked', required=True)
+	res_id = utils.get_field(request, 'res_id', required=True)
+	liked = utils.get_boolean(request, 'liked', required=True)
+	share = utils.get_boolean(request, 'share', required=True)
 	specific = utils.get_field(request, 'specific')
 
 	# save rating
 	utils.update_query(queries.rate_munch, (liked, specific, rating_id))
 
 	# recommend to friends
-	if liked:
+	if share:
 		friends = get_friends_list(user_id)
 		items = ','.join(['(%s, %s,\'%s\')' % (user_id, friend['user_id'], res_id) for friend in friends])
 		utils.update_query(queries.new_recommendation + items)
@@ -71,3 +73,14 @@ def get_activity(user_id, other_id):
 		result['type'] = str(requested(user_id, other_id))
 
 	return jsonify(result=result)
+
+def get_unrated(user_id):
+	ratings = []
+	rows = utils.select_query(queries.get_unrated, (user_id,))
+
+	utils.add_rows_to_list(rows, ratings, ('rating_id', 'res_id', 'photo_url', 'res_name', 'review_date'))
+
+	for i in range(len(ratings)):
+		ratings[i]['review_date'] = utils.time_to_text(ratings[i]['review_date'])
+
+	return ratings
