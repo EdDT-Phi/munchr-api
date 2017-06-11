@@ -1,5 +1,4 @@
 *.pyc
-lib
 __pycache__
 .idea
 dev.sh
