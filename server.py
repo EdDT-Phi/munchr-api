@@ -30,6 +30,10 @@ app.register_blueprint(stars_blueprint)
 def hello_world():
 	return render_template('landing.html')
 
+@app.route('/restaurants/<string:res_id>')
+def hello_res(res_id):
+    return render_template('restaurant.html')
+
 
 @app.errorhandler(InvalidUsage)
 def handle_invalid_usage(error):
