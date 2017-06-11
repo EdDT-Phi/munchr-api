@@ -1,5 +1,9 @@
-from flask import Flask, jsonify, request
+import os
+import json
+
+from flask import Flask, jsonify, render_template
 from flask_cors import CORS
+
 from users.users import users_blueprint
 from users.friends import friends_blueprint
 from users.ratings import ratings_blueprint
@@ -7,10 +11,8 @@ from restaurants.restaurants import restaurants_blueprint
 from restaurants.restaurants_qa import restaurants_qa_blueprint
 from restaurants.recommendations import recommendations_blueprint
 from restaurants.stars import stars_blueprint
-import os
-import json
-from utils.err import InvalidUsage
 from utils import utils
+from utils.err import InvalidUsage
 
 app = Flask(__name__)
 CORS(app)
@@ -22,6 +24,11 @@ app.register_blueprint(friends_blueprint)
 app.register_blueprint(ratings_blueprint)
 app.register_blueprint(recommendations_blueprint)
 app.register_blueprint(stars_blueprint)
+
+
+@app.route('/')
+def hello_world():
+	return render_template('landing.html')
 
 
 @app.errorhandler(InvalidUsage)
