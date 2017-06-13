@@ -118,7 +118,7 @@ def users_facebook_login():
 		utils.update_query(queries.facebook_friends + cont)
 
 	new_token = uuid.uuid1()
-	utils.update_query(queries.save_token, (str(new_token), time.time(), db_pass[0][1]))
+	utils.update_query(queries.save_token, (str(new_token), time.time(), user_id))
 
 	result = {
 		'user_id': user_id,
