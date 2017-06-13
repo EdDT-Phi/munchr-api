@@ -11,6 +11,7 @@ from restaurants.restaurants import restaurants_blueprint
 from restaurants.restaurants_qa import restaurants_qa_blueprint
 from restaurants.recommendations import recommendations_blueprint
 from restaurants.stars import stars_blueprint
+from auth import auth_blueprint
 from utils import utils
 from utils.err import InvalidUsage
 
@@ -24,6 +25,7 @@ app.register_blueprint(friends_blueprint)
 app.register_blueprint(ratings_blueprint)
 app.register_blueprint(recommendations_blueprint)
 app.register_blueprint(stars_blueprint)
+app.register_blueprint(auth_blueprint)
 
 
 @app.route('/')
@@ -48,7 +50,6 @@ def server_error(e):
     print('An error occurred during a request.')
     print(e)
     return jsonify(error='An internal error occurred.'), 500
-
 
 if __name__ == "__main__":
     port = int(os.environ.get('MUNCHR_PORT') or 5000)

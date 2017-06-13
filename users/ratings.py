@@ -3,10 +3,12 @@ from utils import queries, utils
 from restaurants.restaurants import get_details_obj
 from restaurants.filters import filters
 from users.friends import are_friends, requested, get_friends_list
+from auth import auth
 
 ratings_blueprint = Blueprint('ratings', __name__)
 
 @ratings_blueprint.route('/users/rating/', methods=['POST'])
+@auth.login_required
 def user_rating():
 	rating_id = utils.get_num(request, 'rating_id', required=True)
 	user_id = utils.get_num(request, 'user_id', required=True)
@@ -28,8 +30,9 @@ def user_rating():
 
 
 @ratings_blueprint.route('/users/munch/', methods=['POST'])
+@auth.login_required
 def user_munch():
-	user_id = utils.get_field(request, 'user_id', required=True)
+	user_id = utils.get_num(request, 'user_id', required=True)
 	res_id = utils.get_field(request, 'res_id', required=True)
 
 	# save rating
@@ -38,8 +41,22 @@ def user_munch():
 	return jsonify(result={'success': True})
 
 
-@ratings_blueprint.route('/users/activity/friends/<int:user_id>')
-def get_friends_activity(user_id):
+@ratings_blueprint.route('/users/munch/dismiss/', methods=['POST'])
+@auth.login_required
+def dismiss_rating():
+
+	rating_id = utils.get_num(request, 'rating_id', required=True)
+
+	utils.update_query(queries.dismiss_rating, (rating_id,));
+	return jsonify(success=True)
+
+
+@ratings_blueprint.route('/users/activity/friends/', methods=['POST'])
+@auth.login_required
+def get_friends_activity():
+
+	user_id = utils.get_num(request, 'user_id', required=True)
+
 	ratings = utils.select_query(queries.get_friends_activity, (user_id,))
 	results = []
 	utils.add_rows_to_list(ratings, results, ('first_name', 'last_name', 'photo_url', 'liked', 'res_name', 'res_id', 'review_date', 'user_id'))
@@ -49,8 +66,14 @@ def get_friends_activity(user_id):
 
 	return jsonify(results=results)
 
-@ratings_blueprint.route('/users/activity/<int:user_id>/<int:other_id>')
-def get_activity(user_id, other_id):
+
+@ratings_blueprint.route('/users/activity/', methods=['POST'])
+@auth.login_required
+def get_activity():
+
+	user_id = utils.get_num(request, 'user_id', required=True)
+	other_id = utils.get_num(request, 'other_id', required=True)
+
 	result = {
 		'activity': [],
 		'type': None
@@ -73,6 +96,7 @@ def get_activity(user_id, other_id):
 		result['type'] = str(requested(user_id, other_id))
 
 	return jsonify(result=result)
+
 
 def get_unrated(user_id):
 	ratings = []

@@ -1,12 +1,14 @@
 import requests
 import os
-from flask import jsonify, Blueprint, render_template, request
 import datetime
 import random
+import pdb
+from flask import jsonify, Blueprint, render_template, request
 
 from utils import queries, utils
 from restaurants.filters import filters
 from restaurants.stars import is_starred, get_all_starred
+from auth import auth
 
 google_base = 'https://maps.googleapis.com/maps/api/place/'
 # minprice and maxprice and opennow
@@ -28,6 +30,7 @@ def get_filters():
 	return jsonify(results=filters)
 
 @restaurants_blueprint.route('/restaurants/search/', methods=['POST'])
+@auth.login_required
 def search_restaurants():
 
 	lat = utils.get_float(request, 'lat', required=True)
@@ -51,11 +54,12 @@ def search_restaurants():
 	return jsonify(results=results)
 
 @restaurants_blueprint.route('/restaurants/details/', methods=['POST'])
+@auth.login_required
 def get_details():
 
+	user_id = utils.get_num(request, 'user_id', required=True)
 	lat = utils.get_float(request, 'lat', required=True)
 	lng = utils.get_float(request, 'lng', required=True)
-	user_id = utils.get_num(request, 'user_id', required=True)
 	res_id = utils.get_field(request, 'res_id', required=True)
 
 	result = get_details_obj(user_id, res_id, lat, lng)
@@ -63,16 +67,16 @@ def get_details():
 
 
 @restaurants_blueprint.route('/restaurants/', methods=['POST'])
+@auth.login_required
 def get_restaurants():
 
 	lat = utils.get_float(request, 'lat', required=True)
 	lng = utils.get_float(request, 'long', required=True)
 	rad = utils.get_num(request, 'radius', 1, 50, required=True)
 	cuisines = utils.get_list(request, 'cuisines')
-	price = utils.get_num(request, 'price', required=True)
 	user_id = utils.get_num(request, 'user_id', required=True)
 
-	return get_restaurants(lat, lng, rad, price, cuisines, user_id)
+	return get_restaurants(lat, lng, rad, cuisines, user_id)
 
 
 def get_details_obj(user_id, res_id, lat, lng):
@@ -122,7 +126,7 @@ def format_time(time):
 	return utils.time_to_text(datetime.datetime.fromtimestamp(time))
 
 
-def get_restaurants(lat, lng, rad, price, cuisines, user_id):
+def get_restaurants(lat, lng, rad, cuisines, user_id):
 	if cuisines is None: cuisines = []
 
 	lists = []
@@ -155,12 +159,7 @@ def get_restaurants_by_cusine(query, lat, lng):
 	resp = requests.get(query)
 	data = resp.json()
 
-	for res in data['results']:
-		utils.update_query(queries.store_seen_ids, {
-			'id': res['place_id'], 
-			'name': res['name'], 
-			'photo_url': google_photos % (google_key, res['photos'][0]['photo_reference']),
-		})
+	store_in_db(data['results'])
 
 	results = []
 	for restaurant in data['results'][0:5]:
@@ -170,11 +169,11 @@ def get_restaurants_by_cusine(query, lat, lng):
 		e = random.randint(0, 2)
 		mock_restaurants = ['The HighTower', 'Cool Beans']
 		if e == 0:
-			evidence = 'Because you liked %s' % mock_restaurants[random.randint(0, len(mock_restaurants)-1)]
+			evidence = 'This is similar to restaurants you have liked in the past'
 		elif e == 1:
-			evidence = 'Because %d of your friends liked this' % random.randint(2, 10)
+			evidence = 'Many of your friends liked this'
 		elif e == 2:
-			evidence = 'Because users with similar taste liked this'
+			evidence = 'Users with similar taste liked this'
 
 		results.append({
 			'res_id': r['place_id'],
@@ -191,3 +190,25 @@ def get_restaurants_by_cusine(query, lat, lng):
 			'evidence': evidence
 		})
 	return results
+
+def store_in_db(restaurants):
+	ids = [res['place_id'] for res in restaurants if 'photos' in res]
+
+	if len(ids) == 0:
+		return
+
+	stored_ids = utils.select_query(queries.check_res_ids, (tuple(ids),))
+	stored_ids = [item[0] for item in stored_ids]
+
+	if len(ids) == len(stored_ids):
+		return
+
+	query = queries.store_seen_ids
+	vals = []
+	for res in restaurants:
+		if res['place_id'] not in stored_ids and 'photos' in res:
+			query += '(%s, %s, %s),'
+			vals += [res['place_id'], res['name'], google_photos % (google_key, res['photos'][0]['photo_reference'])]
+
+	print(query)
+	utils.update_query(query[:-1], tuple(vals))

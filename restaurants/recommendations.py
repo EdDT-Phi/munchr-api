@@ -4,13 +4,17 @@ from flask import jsonify, Blueprint, render_template, request
 from users.ratings import get_unrated
 from users.friends import get_friend_requests
 from utils import queries, utils
-
+from auth import auth
 
 recommendations_blueprint = Blueprint('recommendations', __name__)
 
 
-@recommendations_blueprint.route('/notifications/<int:user_id>')
-def notifications(user_id):
+@recommendations_blueprint.route('/notifications/', methods=['POST'])
+@auth.login_required
+def notifications():
+
+	user_id = utils.get_num(request, 'user_id', required=True)
+
 	requests = get_friend_requests(user_id)
 
 	recommendations = []
@@ -22,8 +26,14 @@ def notifications(user_id):
 	return jsonify(results={'requests': requests, 'recommendations': recommendations, 'ratings': ratings})
 
 
-@recommendations_blueprint.route('/notifications/dismiss/<int:user_from_id>/<int:user_to_id>/<string:res_id>')
-def delete_recommendation(user_from_id, user_to_id, res_id):
+@recommendations_blueprint.route('/notifications/dismiss/', methods=['POST'])
+@auth.login_required
+def delete_recommendation():
+
+	user_id = utils.get_num(request, 'user_id', required=True)
+	user_to_id = utils.get_num(request, 'user_to_id', required=True)
+	res_id = utils.get_num(request, 'res_id', required=True)
+
 	utils.update_query(queries.delete_recommendation, (user_from_id, user_to_id, res_id));
 	return jsonify(success=True)
 
