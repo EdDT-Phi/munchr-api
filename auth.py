@@ -1,6 +1,5 @@
 import json
 import uuid
-import time
 
 from flask_httpauth import HTTPTokenAuth
 from flask import jsonify, Response, Blueprint, request, render_template
@@ -29,26 +28,7 @@ def verify_token(token):
 	if len(verify_token) == 0:
 		return False
 
-	return time.time() - verify_token[0][0] < 60 * 60 * 2
-
-
-@auth_blueprint.route('/auth/token/', methods=['POST'])
-def get_new_token():
-
-	user_id = utils.get_num(request, 'user_id', required=True)
-	old_token = utils.get_field(request, 'old_token', required=True)
-
-	verify_token = utils.select_query(queries.verify_token, (user_id, old_token))
-
-	if len(verify_token) == 0:
-		print(old_token)
-		print(verify_token)
-		return jsonify({'error': 'failed to authenticate'}), 401
-
-	new_token = uuid.uuid1()
-	utils.update_query(queries.save_token, (str(new_token), time.time(), user_id))
-
-	return jsonify({'token': new_token})
+	return True
 
 
 @auth_blueprint.route('/login/', methods=['POST'])
@@ -66,7 +46,7 @@ def users_login():
 		return jsonify(error='incorrect password')
 
 	new_token = uuid.uuid1()
-	utils.update_query(queries.save_token, (str(new_token), time.time(), db_pass[0][1]))
+	utils.update_query(queries.save_token, (str(new_token), db_pass[0][1]))
 
 	result = {
 		'user_id': db_pass[0][1],
@@ -122,7 +102,7 @@ def users_facebook_login():
 		utils.update_query(queries.facebook_friends + cont)
 
 	new_token = uuid.uuid1()
-	utils.update_query(queries.save_token, (str(new_token), time.time(), user_id))
+	utils.update_query(queries.save_token, (str(new_token), user_id))
 
 	result = {
 		'user_id': user_id,

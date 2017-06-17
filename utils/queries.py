@@ -36,7 +36,7 @@ show_user_email = 'SELECT first_name, last_name, fb_id, email, user_id from user
 
 # Login
 check_login = 'SELECT password, user_id, email, fb_id, photo_url, first_name, last_name FROM users WHERE email = %s'
-save_token = 'UPDATE users SET token = %s, token_time = %s WHERE user_id = %s'
+save_token = 'UPDATE users SET token = %s WHERE user_id = %s'
 verify_token = 'SELECT token_time FROM users WHERE user_id = %s AND token = %s'
 
 # Cuisine QA
