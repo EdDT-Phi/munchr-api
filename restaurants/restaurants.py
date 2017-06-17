@@ -52,6 +52,7 @@ def search_restaurants():
 				'photo_url': google_photos % (google_key, res['photos'][0]['photo_reference']),
 				'address': res['formatted_address']
 				})
+
 	return jsonify(results=results)
 
 @restaurants_blueprint.route('/restaurants/details/', methods=['POST'])
@@ -62,6 +63,7 @@ def get_details():
 	lat = utils.get_float(request, 'lat', required=True)
 	lng = utils.get_float(request, 'lng', required=True)
 	res_id = utils.get_field(request, 'res_id', required=True)
+
 
 	result = get_details_obj(user_id, res_id, lat, lng)
 	return jsonify(result=result)
@@ -120,6 +122,7 @@ def get_details_obj(user_id, res_id, lat, lng):
 	for photo in data['photos']:
 		result['photos'].append(google_photos % (google_key, photo['photo_reference']))
 
+	utils.update_query(queries.store_single_id, (res_id, result['name'], result['photos'][0], res_id))
 	result['starred'] = is_starred(user_id, res_id)
 	return result
 

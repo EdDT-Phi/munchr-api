@@ -15,7 +15,7 @@ def get_stars():
 
 	stars = []
 	rows = utils.select_query(queries.get_stars, (user_id,));
-	utils.add_rows_to_list(rows, stars, ('res_id', 'res_name'))
+	utils.add_rows_to_list(rows, stars, ('res_id', 'res_name', 'photo_url'))
 
 	return jsonify(results=stars)
 

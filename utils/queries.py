@@ -41,6 +41,7 @@ verify_token = 'SELECT token_time FROM users WHERE user_id = %s AND token = %s'
 
 # Cuisine QA
 store_seen_ids = 'INSERT INTO restaurants (res_id, res_name, photo_url) VALUES '
+store_single_id = 'INSERT INTO restaurants (res_id, res_name, photo_url) SELECT %s, %s, %s WHERE NOT EXISTS (SELECT res_id FROM restaurants WHERE res_id = %s);'
 check_res_ids = 'SELECT res_id FROM restaurants WHERE res_id IN %s'
 null_cuisines = 'SELECT res_id FROM restaurants WHERE cuisine IS NULL LIMIT 1'
 update_cuisines = 'UPDATE restaurants SET cuisine = %s WHERE res_id = %s'
@@ -60,6 +61,6 @@ delete_recommendation = 'DELETE FROM recommendations WHERE user_from_id = %s AND
 
 # Stars
 new_star = 'INSERT INTO stars (user_id, res_id) VALUES (%s, %s)'
-get_stars = 'SELECT stars.res_id, res_name FROM stars JOIN restaurants ON stars.res_id = restaurants.res_id WHERE user_id = %s'
+get_stars = 'SELECT stars.res_id, res_name, photo_url FROM stars JOIN restaurants ON stars.res_id = restaurants.res_id WHERE user_id = %s'
 delete_star = 'DELETE FROM stars WHERE user_id = %s AND res_id = %s'
 check_single_star = 'SELECT res_id from stars where user_id = %s AND res_id = %s'
