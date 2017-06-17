@@ -32,7 +32,7 @@ def delete_recommendation():
 
 	user_id = utils.get_num(request, 'user_id', required=True)
 	user_to_id = utils.get_num(request, 'user_to_id', required=True)
-	res_id = utils.get_num(request, 'res_id', required=True)
+	res_id = utils.get_field(request, 'res_id', required=True)
 
 	utils.update_query(queries.delete_recommendation, (user_from_id, user_to_id, res_id));
 	return jsonify(success=True)
