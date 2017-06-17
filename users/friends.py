@@ -9,8 +9,8 @@ friends_blueprint = Blueprint('friends', __name__)
 @auth.login_required
 def delete_friend():
 
-	user_id1 = utils.get_num(request, 'user_id1', required=True)
-	user_id2 = utils.get_num(request, 'user_id2', required=True)
+	user_id = utils.get_num(request, 'user_id1', required=True)
+	user_to_id = utils.get_num(request, 'user_id2', required=True)
 
 	utils.update_query(queries.remove_friend, {'u1': user_id1, 'u2': user_id2})
 
@@ -33,7 +33,7 @@ def get_friends():
 @auth.login_required
 def new_friend():
 
-	user_from_id = utils.get_num(request, 'user_from_id', required=True)
+	user_id = utils.get_num(request, 'user_from_id', required=True)
 	user_to_id = utils.get_num(request, 'user_to_id', required=True)
 
 	utils.update_query(queries.friend_request, (user_from_id, user_to_id))

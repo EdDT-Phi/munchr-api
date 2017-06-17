@@ -4,16 +4,18 @@ from flask import jsonify, Response, Blueprint, request, render_template
 from flask_bcrypt import generate_password_hash, check_password_hash
 
 from utils import queries, utils
+from auth import auth
 
 
 users_blueprint = Blueprint('users', __name__)
 
 
 @users_blueprint.route('/users/search/', methods=['POST'])
+@auth.login_required
 def users_search():
 
-	query = utils.get_field(request, 'query', required=True)
 	user_id = utils.get_num(request, 'user_id', required=True)
+	query = utils.get_field(request, 'query', required=True)
 
 	query = query.lower()
 	results = []
@@ -43,11 +45,6 @@ def users_route():
 	email = utils.get_field(request, 'email', required=True)
 	password = utils.get_field(request, 'password', required=True)
 
-	return new_user(first_name, last_name, email, password)
-
-
-def new_user(first_name, last_name, email, password):
-
 	password = generate_password_hash(password, 12)
 	first_name = utils.to_name(first_name)
 	last_name = utils.to_name(last_name)
@@ -63,19 +60,3 @@ def new_user(first_name, last_name, email, password):
 	}
 
 	return jsonify(result=result)
-
-
-def get_all_users():
-	rows = utils.select_query(queries.show_all_users)
-	result = []
-	utils.add_rows_to_list(rows, result, ('first_name', 'last_name', 'fb_id', 'email', 'user_id'))
-	return Response(json.dumps(result),  mimetype='application/json')
-
-
-def get_user(user_id):
-	rows = utils.select_query(queries.show_user % user_id)
-	if len(rows) == 0:
-		return jsonify(error='No user with that id')
-	result = []
-	utils.add_rows_to_list(rows, result, ('first_name', 'last_name', 'fb_id', 'email'))
-	return Response(json.dumps(result),  mimetype='application/json')

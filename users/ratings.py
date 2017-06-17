@@ -10,8 +10,8 @@ ratings_blueprint = Blueprint('ratings', __name__)
 @ratings_blueprint.route('/users/rating/', methods=['POST'])
 @auth.login_required
 def user_rating():
-	rating_id = utils.get_num(request, 'rating_id', required=True)
 	user_id = utils.get_num(request, 'user_id', required=True)
+	rating_id = utils.get_num(request, 'rating_id', required=True)
 	res_id = utils.get_field(request, 'res_id', required=True)
 	liked = utils.get_boolean(request, 'liked', required=True)
 	share = utils.get_boolean(request, 'share', required=True)

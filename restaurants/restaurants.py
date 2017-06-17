@@ -70,11 +70,11 @@ def get_details():
 @auth.login_required
 def get_restaurants():
 
+	user_id = utils.get_num(request, 'user_id', required=True)
 	lat = utils.get_float(request, 'lat', required=True)
 	lng = utils.get_float(request, 'long', required=True)
 	rad = utils.get_num(request, 'radius', 1, 50, required=True)
 	cuisines = utils.get_list(request, 'cuisines')
-	user_id = utils.get_num(request, 'user_id', required=True)
 
 	return get_restaurants(lat, lng, rad, cuisines, user_id)
 
