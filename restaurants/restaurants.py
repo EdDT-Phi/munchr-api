@@ -45,12 +45,13 @@ def search_restaurants():
 
 	results = []
 	for res in data:
-		results.append({
-			'res_id': res['place_id'],
-			'name': res['name'],
-			'photo_url': google_photos % (google_key, res['photos'][0]['photo_reference']),
-			'address': res['formatted_address']
-			})
+		if 'photos' in res:
+			results.append({
+				'res_id': res['place_id'],
+				'name': res['name'],
+				'photo_url': google_photos % (google_key, res['photos'][0]['photo_reference']),
+				'address': res['formatted_address']
+				})
 	return jsonify(results=results)
 
 @restaurants_blueprint.route('/restaurants/details/', methods=['POST'])
