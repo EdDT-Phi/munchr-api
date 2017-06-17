@@ -97,7 +97,6 @@ def get_details_obj(user_id, res_id, lat, lng):
 		'website': data['website'],
 		'price': -1,
 		'name': data['name'],
-		'rating': data['rating'],
 		'location': {
 			'address': data['vicinity'],
 			'lat': data['geometry']['location']['lat'],
@@ -190,7 +189,6 @@ def get_restaurants_by_cusine(query, lat, lng):
 				'lon': r['geometry']['location']['lng']
 			},
 			'price': -1 if 'price_level' not in r else r['price_level'],
-			'rating': -1 if 'rating' not in r else r['rating'],
 			'distance': utils.haversine(float(lat), float(lng), r['geometry']['location']['lat'], r['geometry']['location']['lng']),
 			'evidence': evidence
 		})
