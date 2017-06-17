@@ -134,24 +134,25 @@ def get_restaurants(lat, lng, rad, cuisines, user_id):
 	if cuisines is None: cuisines = []
 
 	lists = []
-	rad *= 1000
+	rad *= 1600
+	used_rad = max(5000, min(50000, rad * 2))
 	if len(cuisines) == 0:
 		cuisines = ['food']
 
 	for cuisine in cuisines:
-		query = google_search  % (google_key, lat, lng, rad, cuisine)
+		query = google_search  % (google_key, lat, lng, used_rad, cuisine)
 		lists.append(get_restaurants_by_cusine(query, lat, lng))
 
 	results = []
 	starred = get_all_starred(user_id)
 	for i in range(max([len(lst) for lst in lists])):
 		for lst in lists:
-			if i < len(lst):
+			if i < len(lst) and lst[i]['distance'] < rad / 1500:
 				res = lst[i]
 				res['starred'] = (res['res_id'] in starred)
 				results.append(lst[i])
-
-
+		if len(results) == 10:
+			break
 
 	return jsonify(results=results)
 
@@ -166,7 +167,7 @@ def get_restaurants_by_cusine(query, lat, lng):
 	store_in_db(data['results'])
 
 	results = []
-	for restaurant in data['results'][0:5]:
+	for restaurant in data['results']:
 		r = restaurant
 		if 'photos' not in r: continue
 
@@ -188,7 +189,7 @@ def get_restaurants_by_cusine(query, lat, lng):
 				'lat': r['geometry']['location']['lat'],
 				'lon': r['geometry']['location']['lng']
 			},
-			'price_level': -1 if 'price_level' not in r else r['price_level'],
+			'price': -1 if 'price_level' not in r else r['price_level'],
 			'rating': -1 if 'rating' not in r else r['rating'],
 			'distance': utils.haversine(float(lat), float(lng), r['geometry']['location']['lat'], r['geometry']['location']['lng']),
 			'evidence': evidence
