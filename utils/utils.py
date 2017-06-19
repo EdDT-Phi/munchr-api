@@ -20,7 +20,7 @@ def haversine(lat1, lon1, lat2, lon2):
 
 	distance = R * c
 
-	return round(distance / 1.6, 2)
+	return round(distance / 1.6 - 0.5)
 
 
 def get_field(request, field, required=False):
