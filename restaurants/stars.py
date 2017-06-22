@@ -39,7 +39,7 @@ def delete_star():
 	res_id = utils.get_field(request, 'res_id', required=True)
 
 	utils.update_query(queries.delete_star, (user_id, res_id))
-	return notifications(user_id)
+	return jsonify(success=True)
 
 
 def is_starred(user_id, res_id):

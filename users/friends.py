@@ -10,9 +10,9 @@ friends_blueprint = Blueprint('friends', __name__)
 def delete_friend():
 
 	user_id = utils.get_num(request, 'user_id', required=True)
-	user_to_id = utils.get_num(request, 'user_id2', required=True)
+	user_to_id = utils.get_num(request, 'user_to_id', required=True)
 
-	utils.update_query(queries.remove_friend, {'u1': user_id1, 'u2': user_id2})
+	utils.update_query(queries.remove_friend, {'u1': user_id, 'u2': user_to_id})
 
 	return jsonify(success=True)
 
@@ -54,7 +54,7 @@ def friends_respond():
 		# add friend
 		utils.update_query(queries.accept_request, {'user_id1': user_id, 'user_id2': oth_id})
 
-	return friends(user_id)
+	return get_friends()
 
 
 def are_friends(user_id1, user_id2):
