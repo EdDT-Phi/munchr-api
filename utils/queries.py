@@ -21,8 +21,8 @@ search_all = 'SELECT user_id, first_name, last_name, photo_url FROM users ' \
              'OR first_name LIKE %s OR last_name LIKE %s) LIMIT 10;'
 
 # User Queries
-new_user = 'INSERT INTO users (first_name, last_name, email, password) ' \
-           'VALUES (%s, %s, %s, %s) RETURNING user_id'
+new_user = 'INSERT INTO users (first_name, last_name, email, password, token) ' \
+           'VALUES (%s, %s, %s, %s, %s) RETURNING user_id'
 new_fb_user = 'INSERT INTO users (first_name, last_name, fb_id, email, photo_url) ' \
            'VALUES (%s, %s, %s, %s, %s) RETURNING user_id'
 update_user = 'UPDATE users SET first_name = %s, last_name = %s, fb_id = %s, photo_url = %s WHERE email = %s RETURNING user_id'
