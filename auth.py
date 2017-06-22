@@ -13,8 +13,6 @@ auth = HTTPTokenAuth(scheme='Token')
 
 @auth.verify_token
 def verify_token(token):
-	print('verifying token: %s' % token)
-
 	user_id = utils.get_num(request, 'user_id', required=True)
 
 	if user_id == 3 and token == 'test-token':
