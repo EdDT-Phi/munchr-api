@@ -95,7 +95,7 @@ def get_details_obj(user_id, res_id, lat, lng):
 		'photos': [],
 		'phone': data['formatted_phone_number'],
 		'website': data['website'],
-		'price': -1,
+		'price': '' if 'price_level' not in data else '$' * data['price_level'],
 		'name': data['name'],
 		'location': {
 			'address': data['vicinity'],
@@ -107,9 +107,6 @@ def get_details_obj(user_id, res_id, lat, lng):
 
 	if 'opening_hours' in data:
 		result['opennow'] = data['opening_hours']['open_now'],
-
-	if 'price_level' in data:
-		result['price'] = data['price_level']
 
 	for review in data['reviews']:
 		if review['rating'] > 3:
@@ -188,7 +185,7 @@ def get_restaurants_by_cusine(query, lat, lng):
 				'lat': r['geometry']['location']['lat'],
 				'lon': r['geometry']['location']['lng']
 			},
-			'price': -1 if 'price_level' not in r else r['price_level'],
+			'price': '' if 'price_level' not in r else '$' * r['price_level'],
 			'distance': utils.haversine(float(lat), float(lng), r['geometry']['location']['lat'], r['geometry']['location']['lng']),
 			'evidence': evidence
 		})
